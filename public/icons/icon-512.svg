@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="roseGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#881337" />
+      <stop offset="50%" stop-color="#9f1239" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#roseGold)" />
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#fbcfe8" stroke-width="4" stroke-dasharray="10 10" opacity="0.6"/>
+  <!-- Two intertwined wedding rings -->
+  <circle cx="218" cy="256" r="86" fill="none" stroke="#ffffff" stroke-width="16" />
+  <circle cx="294" cy="256" r="86" fill="none" stroke="url(#goldAccent)" stroke-width="16" />
+  <circle cx="256" cy="164" r="14" fill="#fef08a" />
+</svg>

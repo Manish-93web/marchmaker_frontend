@@ -1,0 +1,41 @@
+{
+  "name": "Marchmaker — Curated Matrimonial Matchmaking",
+  "short_name": "Marchmaker",
+  "description": "India's human-reviewed, privacy-first matrimonial matchmaking platform based on values and shared life goals.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#fdf8f6",
+  "theme_color": "#9f1239",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "matrimony", "social"],
+  "shortcuts": [
+    {
+      "name": "Introductions",
+      "short_name": "Matches",
+      "description": "View your curated hand-reviewed introductions",
+      "url": "/dashboard/introductions",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Verification Hub",
+      "short_name": "KYC",
+      "description": "Identity and trust verification",
+      "url": "/dashboard/verification",
+      "icons": [{ "src": "/icons/icon-192.svg", "sizes": "192x192" }]
+    }
+  ]
+}
