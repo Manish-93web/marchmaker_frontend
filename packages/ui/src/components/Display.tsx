@@ -70,7 +70,7 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-hero border border-dashed border-border p-10 text-center">
-      {icon}
+      {icon ?? <EmptyArt />}
       <h3 className="font-display text-xl text-ink">{title}</h3>
       {description && <p className="max-w-md text-muted">{description}</p>}
       {action}
@@ -131,5 +131,18 @@ export function Banner({
     <div role="status" className={cn('rounded-card border-l-4 bg-surface-2 px-4 py-3 text-sm text-ink', tones[tone])}>
       {children}
     </div>
+  );
+}
+
+/** A quiet line drawing of an open envelope with a petal: the default picture for "nothing here yet". Decorative. */
+function EmptyArt() {
+  return (
+    <svg viewBox="0 0 120 90" width="120" height="90" role="presentation" aria-hidden="true" focusable="false" className="text-primary">
+      <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 38l42-26 42 26v38a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6z" />
+        <path d="M18 38l42 28 42-28" />
+      </g>
+      <ellipse cx="60" cy="34" rx="7" ry="12" fill="var(--color-accent, #F2A33A)" opacity="0.9" transform="rotate(-20 60 34)" />
+    </svg>
   );
 }

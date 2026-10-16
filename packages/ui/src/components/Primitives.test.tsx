@@ -130,3 +130,38 @@ describe('CommandPalette', () => {
     expect(onClose).toHaveBeenCalled();
   });
 });
+
+import { Combobox, EmptyState } from '../index';
+import { useState } from 'react';
+
+function Cities() {
+  const [v, setV] = useState('');
+  return <Combobox label="City" value={v} onValueChange={setV} options={[{ value: 'pune', label: 'Pune' }, { value: 'patna', label: 'Patna' }, { value: 'mumbai', label: 'Mumbai' }]} />;
+}
+
+describe('Combobox', () => {
+  it('filters as you type, moves with arrows and picks with Enter', async () => {
+    render(<Cities />);
+    const box = screen.getByRole('combobox', { name: 'City' });
+    await userEvent.click(box);
+    await userEvent.type(box, 'p');
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Pune', 'Patna']);
+    await userEvent.keyboard('{ArrowDown}{Enter}');
+    expect(box).toHaveValue('Patna');
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+
+  it('says so when nothing matches', async () => {
+    render(<Cities />);
+    await userEvent.type(screen.getByRole('combobox'), 'zzz');
+    expect(screen.getByText('No matches')).toBeInTheDocument();
+  });
+});
+
+describe('EmptyState', () => {
+  it('draws a decorative picture by default', () => {
+    const { container } = render(<EmptyState title="Nothing yet" />);
+    expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('Nothing yet')).toBeInTheDocument();
+  });
+});
