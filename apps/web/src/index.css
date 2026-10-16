@@ -1,0 +1,10 @@
+@import '@marchmaker/ui/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
