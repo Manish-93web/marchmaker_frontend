@@ -108,4 +108,3 @@ export const STEP_FIELDS: Record<Exclude<ProfileStep, 'photos'>, FieldDef[]> = {
 };
 
 export const PROMPT_IDS = ['perfect_sunday', 'looking_for', 'grew_up'] as const;
-export const BIO_MIN = 50;

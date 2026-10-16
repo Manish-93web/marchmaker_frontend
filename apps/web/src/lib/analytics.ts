@@ -16,7 +16,7 @@ let queue: Queued[] = [];
 let timer: ReturnType<typeof setTimeout> | undefined;
 
 /** A random id kept only in this browser. It is not linked to an account on the client. */
-export function anonId(): string {
+function anonId(): string {
   try {
     let id = localStorage.getItem(ANON_KEY);
     if (!id) {

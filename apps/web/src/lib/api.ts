@@ -34,7 +34,7 @@ export interface RequestOptions {
  * A random id kept in this browser, sent only when creating an account. The server stores a keyed hash of it
  * to notice one person inviting themselves from several accounts; it is not used for tracking or advertising.
  */
-export function deviceId(): string | undefined {
+function deviceId(): string | undefined {
   try {
     let id = localStorage.getItem('mm_device');
     if (!id) {

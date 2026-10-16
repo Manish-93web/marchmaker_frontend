@@ -11,7 +11,7 @@ import type { ProfileStep } from '@marchmaker/shared';
 type Values = Record<string, unknown>;
 type FormStep = Exclude<ProfileStep, 'photos'>;
 
-export function SaveIndicator({ state }: { state: SaveState }) {
+function SaveIndicator({ state }: { state: SaveState }) {
   const { t } = useTranslation();
   const text =
     state === 'saving'

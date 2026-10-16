@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/react';
 const SECRETISH = /(password|token|secret|authorization|cookie|otp|code|phone|email|dob|note|body|message)/i;
 
 /** Removes anything that could identify a member or carry their words before an event leaves the browser. */
-export function scrub<T>(value: T, depth = 0): T {
+function scrub<T>(value: T, depth = 0): T {
   if (depth > 6 || value === null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map((v) => scrub(v, depth + 1)) as T;
   return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, SECRETISH.test(k) ? '[removed]' : scrub(v, depth + 1)])) as T;

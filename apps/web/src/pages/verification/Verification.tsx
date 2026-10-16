@@ -23,7 +23,7 @@ export interface VerificationStatus {
   retentionDays: number;
 }
 
-export const VERIFICATION_KEY = ['verification'] as const;
+const VERIFICATION_KEY = ['verification'] as const;
 
 interface UploadTicket {
   upload: { url: string; method: 'PUT'; headers: Record<string, string> };

@@ -33,7 +33,7 @@ interface Page {
   hasMore: boolean;
 }
 
-export const THREADS_KEY = ['threads'] as const;
+const THREADS_KEY = ['threads'] as const;
 
 export function MessageList() {
   const { t } = useTranslation();

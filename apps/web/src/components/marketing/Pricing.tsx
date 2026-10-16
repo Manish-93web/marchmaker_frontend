@@ -52,7 +52,7 @@ export function effectiveInterval(plan: PlanDefinition, wanted: BillingInterval)
   return (BILLING_INTERVALS.find((i) => plan.prices[i] !== undefined) ?? 'monthly') as BillingInterval;
 }
 
-export function PlanCard({ plan, interval }: { plan: PlanDefinition; interval: BillingInterval }) {
+function PlanCard({ plan, interval }: { plan: PlanDefinition; interval: BillingInterval }) {
   const { t } = useTranslation();
   const shown = effectiveInterval(plan, interval);
   const price = plan.prices[shown] ?? 0;
