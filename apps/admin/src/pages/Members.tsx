@@ -2,6 +2,7 @@ import { Badge, Banner, Button } from '@marchmaker/ui';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { SavedFilters } from '../components/SavedFilters';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DataTable } from '../components/DataTable';
 import { api } from '../lib/api';
@@ -93,6 +94,13 @@ export function Members() {
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl text-primary">Members</h1>
+      <SavedFilters
+        current={{ q, status, verified }}
+        onApply={(f) => {
+          setText(f.q ?? '');
+          setParams(new URLSearchParams(Object.entries(f).filter(([, v]) => v)), { replace: true });
+        }}
+      />
       <div className="flex flex-wrap items-end gap-3">
         <label className="block text-sm">
           <span className="mb-1 block font-medium">Search</span>

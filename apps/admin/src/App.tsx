@@ -9,6 +9,11 @@ import { Dashboard } from './pages/Dashboard';
 import { GuidesAdmin } from './pages/Guides';
 import { Experiments, Insights, StoryReview } from './pages/Growth';
 import { Referrals } from './pages/Referrals';
+import { FaqAdmin, LegalAdmin } from './pages/Content';
+import { InvoicesAdmin } from './pages/FinanceExtras';
+import { IntroductionsMonitor } from './pages/Introductions';
+import { NotificationsAdmin } from './pages/Notifications';
+import { DataRequests, Jobs, OperationsSettings } from './pages/System';
 import { Appeals, ModerationCase, ModerationQueue, SupportInbox, SupportTicket } from './pages/Safety';
 import { Coupons, Payments, PlansAdmin, Subscriptions, Webhooks } from './pages/Finance';
 import { MemberDetail } from './pages/MemberDetail';
@@ -69,6 +74,14 @@ function Console({ me }: { me: StaffMe }) {
         <Route path="webhooks" element={g('payment.view', <Webhooks />)} />
         <Route path="coupons" element={g('coupon.manage', <Coupons />)} />
         <Route path="plans" element={g('plan.manage', <PlansAdmin />)} />
+        <Route path="introductions" element={g('introduction.view', <IntroductionsMonitor />)} />
+        <Route path="invoices" element={g('payment.view', <InvoicesAdmin />)} />
+        <Route path="legal" element={g('legal.manage', <LegalAdmin />)} />
+        <Route path="faqs" element={g('content.manage', <FaqAdmin />)} />
+        <Route path="notifications" element={g('settings.manage', <NotificationsAdmin />)} />
+        <Route path="jobs" element={g('jobs.manage', <Jobs />)} />
+        <Route path="data-requests" element={g('data_requests.approve', <DataRequests />)} />
+        <Route path="operations" element={g('settings.manage', <OperationsSettings />)} />
         <Route path="audit" element={g('audit.view', <Audit />)} />
         <Route path="assessments" element={g('content.manage', <Banks />)} />
         <Route path="team" element={g('admin_users.manage', <Team />)} />

@@ -6,6 +6,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { DataTable } from '../components/DataTable';
 import { api } from '../lib/api';
 import { can, errorMessage, useStaff } from '../lib/session';
+import { NewPlanDialog, ReconcileStatus } from './FinanceExtras';
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString('en-IN') : '–');
 const inputCls = 'mt-1 min-h-[44px] w-full rounded-card border border-border bg-surface px-3';
@@ -281,6 +282,7 @@ export function Webhooks() {
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl text-primary">Payment webhooks</h1>
+      <ReconcileStatus />
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={failedOnly} onChange={(e) => setFailedOnly(e.target.checked)} />
@@ -510,6 +512,7 @@ function PlanEditor({ plan, onClose }: { plan: PlanRow; onClose: () => void }) {
 
 export function PlansAdmin() {
   const [edit, setEdit] = useState<PlanRow | null>(null);
+  const [creating, setCreating] = useState(false);
   const q = useQuery({ queryKey: ['plans-admin'], queryFn: () => api<{ items: PlanRow[] }>('/admin/billing/plans') });
   const columns = useMemo<ColumnDef<PlanRow, unknown>[]>(
     () => [
@@ -542,9 +545,11 @@ export function PlansAdmin() {
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl text-primary">Plans and packs</h1>
+      <Button onClick={() => setCreating(true)}>New plan or pack</Button>
       {q.isError && <Banner tone="danger">{errorMessage(q.error)}</Banner>}
       <DataTable caption="Plans" columns={columns} data={q.data?.items ?? []} loading={q.isLoading} empty="No plans" />
       {edit && <PlanEditor plan={edit} onClose={() => setEdit(null)} />}
+      {creating && <NewPlanDialog onClose={() => setCreating(false)} />}
     </div>
   );
 }

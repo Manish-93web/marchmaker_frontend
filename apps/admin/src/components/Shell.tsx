@@ -29,6 +29,13 @@ import {
   FlaskConical,
   Quote,
   Headphones,
+  Activity,
+  Bell,
+  FileText,
+  HelpCircle,
+  Receipt,
+  Radar,
+  Database,
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
@@ -52,6 +59,7 @@ export const NAV: NavItem[] = [
   { to: '/photos', label: 'Photo review', perm: 'photo.review', icon: Camera },
   { to: '/matches', label: 'Match review', perm: 'match.review', icon: Heart },
   { to: '/verification', label: 'Verification', perm: 'verification.view_evidence', icon: ShieldCheck },
+  { to: '/introductions', label: 'Introductions monitor', perm: 'introduction.view', icon: Radar },
   { to: '/moderation', label: 'Moderation', perm: 'moderation.view', icon: ShieldAlert },
   { to: '/appeals', label: 'Appeals', perm: 'moderation.view', icon: Gavel },
   { to: '/support', label: 'Support inbox', perm: 'support.view', icon: LifeBuoy },
@@ -59,6 +67,7 @@ export const NAV: NavItem[] = [
   { to: '/payments', label: 'Payments', perm: 'payment.view', icon: CreditCard },
   { to: '/subscriptions', label: 'Subscriptions', perm: 'payment.view', icon: Repeat },
   { to: '/webhooks', label: 'Payment webhooks', perm: 'payment.view', icon: Webhook },
+  { to: '/invoices', label: 'Invoices', perm: 'payment.view', icon: Receipt },
   { to: '/coupons', label: 'Coupons', perm: 'coupon.manage', icon: Tag },
   { to: '/plans', label: 'Plans and packs', perm: 'plan.manage', icon: Layers },
   { to: '/audit', label: 'Audit log', perm: 'audit.view', icon: History },
@@ -68,6 +77,12 @@ export const NAV: NavItem[] = [
   { to: '/experiments', label: 'Experiments', perm: 'flags.manage', icon: FlaskConical },
   { to: '/guides', label: 'E-guides', perm: 'content.manage', icon: Headphones },
   { to: '/stories', label: 'Success stories', perm: 'content.manage', icon: Quote },
+  { to: '/legal', label: 'Legal documents', perm: 'legal.manage', icon: FileText },
+  { to: '/faqs', label: 'FAQ', perm: 'content.manage', icon: HelpCircle },
+  { to: '/notifications', label: 'Notifications', perm: 'settings.manage', icon: Bell },
+  { to: '/jobs', label: 'Jobs and providers', perm: 'jobs.manage', icon: Activity },
+  { to: '/data-requests', label: 'Data requests', perm: 'data_requests.approve', icon: Database },
+  { to: '/operations', label: 'Operations settings', perm: 'settings.manage', icon: Sliders },
   { to: '/flags', label: 'Feature flags', perm: 'flags.manage', icon: Flag },
   { to: '/settings', label: 'Matching settings', perm: 'settings.manage', icon: Sliders },
 ];

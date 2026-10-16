@@ -30,6 +30,7 @@ interface CaseRow {
 export function ModerationQueue() {
   const nav = useNavigate();
   const [scope, setScope] = useState<'open' | 'mine' | 'all'>('open');
+  const [view, setView] = useState<'table' | 'board'>('table');
   const q = useQuery({
     queryKey: ['moderation', scope],
     queryFn: () =>
@@ -57,8 +58,19 @@ export function ModerationQueue() {
           </Button>
         ))}
       </div>
+      <div role="group" aria-label="View" className="flex gap-2">
+        {(['table', 'board'] as const).map((v) => (
+          <Button key={v} size="sm" aria-pressed={view === v} variant={view === v ? 'primary' : 'outline'} onClick={() => setView(v)}>
+            {v === 'table' ? 'Table' : 'Board'}
+          </Button>
+        ))}
+      </div>
       {q.isError && <Banner tone="danger">{errorMessage(q.error)}</Banner>}
-      <DataTable caption="Reports" columns={columns} data={q.data?.items ?? []} loading={q.isLoading} empty="No reports in this view" onRowClick={(r) => nav(`/moderation/${r.id}`)} />
+      {view === 'board' ? (
+        <ReportBoard rows={q.data?.items ?? []} onOpen={(id) => nav(`/moderation/${id}`)} />
+      ) : (
+        <DataTable caption="Reports" columns={columns} data={q.data?.items ?? []} loading={q.isLoading} empty="No reports in this view" onRowClick={(r) => nav(`/moderation/${r.id}`)} />
+      )}
     </div>
   );
 }
@@ -72,6 +84,9 @@ interface CaseDetailView extends CaseRow {
   history: { id: string; action: string; reason: string; at: string }[];
   transcript: { at: string; senderId: string; body: string }[] | null;
   transcriptRestricted: boolean;
+  evidence: { name: string; contentType: string; url: string }[];
+  evidenceRestricted: boolean;
+  sourceTicketId: string | null;
   resolution: { action: string; reason: string; at: string } | null;
 }
 
@@ -187,6 +202,31 @@ export function ModerationCase() {
         </ol>
         {d.transcript && d.transcript.length > 0 && <p className="mt-2 text-xs text-muted">Viewing is recorded in the audit log.</p>}
       </section>
+
+      {(d.evidence?.length > 0 || d.evidenceRestricted) && (
+        <section className="rounded-card border border-border p-4">
+          <h2 className="font-medium">Screenshots from the reporter</h2>
+          {d.evidenceRestricted && <p className="mt-2 text-sm text-muted">You do not have permission to view screenshots.</p>}
+          <ul className="mt-2 flex flex-wrap gap-3">
+            {d.evidence?.map((e) => (
+              <li key={e.url}>
+                <a href={e.url} target="_blank" rel="noopener noreferrer">
+                  <img src={e.url} alt="Screenshot attached to the report" className="h-40 rounded border border-border" />
+                </a>
+              </li>
+            ))}
+          </ul>
+          {d.evidence?.length > 0 && <p className="mt-2 text-xs text-muted">Viewing is recorded in the audit log. Links expire after five minutes.</p>}
+        </section>
+      )}
+      {d.sourceTicketId && (
+        <p className="text-sm">
+          Raised from a support ticket:{' '}
+          <Link className="underline" to={`/support/${d.sourceTicketId}`}>
+            open it
+          </Link>
+        </p>
+      )}
 
       {d.history.length > 0 && (
         <section className="rounded-card border border-border p-4">
@@ -386,7 +426,8 @@ export function SupportInbox() {
 interface TicketFull extends TicketStaffRow {
   firstResponseAt: string | null;
   member: { id: string; name: string; status: string; plan: string; journeyState: string } | null;
-  messages: { id: string; author: string; body: string; internal: boolean; at: string }[];
+  rating: number | null;
+  messages: { id: string; author: string; body: string; internal: boolean; at: string; attachments: { name: string; contentType: string; url: string }[] }[];
 }
 
 export function SupportTicket() {
@@ -397,6 +438,7 @@ export function SupportTicket() {
   const canned = useQuery({ queryKey: ['canned'], queryFn: () => api<{ items: { id: string; title: string; body: string }[] }>('/admin/support/canned') });
   const [text, setText] = useState('');
   const [internal, setInternal] = useState(false);
+  const [escalate, setEscalate] = useState(false);
   const refresh = () => qc.invalidateQueries({ queryKey: ['ticket', id] });
   const send = useMutation({
     mutationFn: () => api(`/admin/support/tickets/${id}/${internal ? 'note' : 'reply'}`, { method: 'POST', body: { body: text } }),
@@ -454,6 +496,11 @@ export function SupportTicket() {
             <Button size="sm" variant="outline" onClick={() => patch.mutate({ priority: t.priority === 'high' ? 'normal' : 'high' })}>
               Make {t.priority === 'high' ? 'normal' : 'high'} priority
             </Button>
+            {can(me, 'moderation.act') && t.member && (
+              <Button size="sm" variant="outline" onClick={() => setEscalate(true)}>
+                Escalate to moderation
+              </Button>
+            )}
             {t.status !== 'resolved' && t.status !== 'closed' && (
               <Button size="sm" onClick={() => patch.mutate({ status: 'resolved' })}>
                 Mark resolved
@@ -473,10 +520,29 @@ export function SupportTicket() {
               {m.internal ? 'Internal note' : m.author === 'staff' ? 'Team' : 'Member'} · {when(m.at)}
             </p>
             <p className="mt-1 whitespace-pre-wrap">{m.body}</p>
+            {m.attachments?.length > 0 && (
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {m.attachments.map((a) => (
+                  <li key={a.url}>
+                    {a.contentType.startsWith('image/') ? (
+                      <a href={a.url} target="_blank" rel="noopener noreferrer">
+                        <img src={a.url} alt="Attachment from the member" className="h-24 rounded border border-border" />
+                      </a>
+                    ) : (
+                      <a className="underline" href={a.url} target="_blank" rel="noopener noreferrer">
+                        Open attachment (PDF)
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ol>
+      {t.rating !== null && <p className="text-sm">Member rating: {t.rating} out of 5</p>}
 
+      {escalate && t.member && <EscalateDialog ticketId={id} onClose={() => setEscalate(false)} />}
       {canReply && t.status !== 'closed' && (
         <section className="space-y-3">
           {canned.data && canned.data.items.length > 0 && (
@@ -512,6 +578,98 @@ export function SupportTicket() {
           </Button>
         </section>
       )}
+    </div>
+  );
+}
+
+const REPORT_CATEGORIES = ['safety_threat', 'underage', 'scam_money_request', 'harassment', 'married_misrepresentation', 'fake_profile', 'inappropriate_content', 'other'];
+
+function EscalateDialog({ ticketId, onClose }: { ticketId: string; onClose: () => void }) {
+  const nav = useNavigate();
+  const [category, setCategory] = useState('harassment');
+  const [reported, setReported] = useState('');
+  const [note, setNote] = useState('');
+  const m = useMutation({
+    mutationFn: () => api<{ reportId: string }>(`/admin/support/tickets/${ticketId}/escalate`, { method: 'POST', body: { category, reportedUserId: reported.trim(), note } }),
+    onSuccess: (r) => nav(`/moderation/${r.reportId}`),
+  });
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="presentation">
+      <div role="dialog" aria-modal="true" aria-label="Escalate to moderation" className="w-full max-w-md space-y-3 rounded-hero bg-surface p-6 shadow-lg">
+        <h2 className="font-display text-xl text-primary">Escalate to moderation</h2>
+        <p className="text-sm text-muted">Creates a report from this conversation. It joins the moderation queue with its own response deadline.</p>
+        <label className="block text-sm font-medium">
+          Category
+          <select className="mt-1 min-h-[44px] w-full rounded-card border border-border bg-surface px-3" value={category} onChange={(e) => setCategory(e.target.value)}>
+            {REPORT_CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c.replaceAll('_', ' ')}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm font-medium">
+          Member being reported (member ID)
+          <input className="mt-1 min-h-[44px] w-full rounded-card border border-border bg-surface px-3" value={reported} onChange={(e) => setReported(e.target.value)} />
+        </label>
+        <label className="block text-sm font-medium">
+          What the moderator should know
+          <textarea className={area} value={note} onChange={(e) => setNote(e.target.value)} />
+        </label>
+        {m.isError && <Banner tone="danger">{errorMessage(m.error)}</Banner>}
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button loading={m.isPending} disabled={!/^[a-f0-9]{24}$/i.test(reported.trim()) || note.trim().length < 5} onClick={() => m.mutate()}>
+            Create report
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const BOARD: { id: string; label: string }[] = [
+  { id: 'new', label: 'New' },
+  { id: 'investigating', label: 'Being looked at' },
+  { id: 'escalated', label: 'Escalated' },
+  { id: 'closed', label: 'Closed' },
+];
+
+function column(r: CaseRow): string {
+  if (['action_taken', 'dismissed'].includes(r.status)) return 'closed';
+  if (r.escalated) return 'escalated';
+  return r.status === 'investigating' || r.assigneeId ? 'investigating' : 'new';
+}
+
+/** The same reports as columns by stage. Acting on a report still happens inside the case, where the reason is recorded. */
+function ReportBoard({ rows, onOpen }: { rows: CaseRow[]; onOpen: (id: string) => void }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-4" aria-label="Report board">
+      {BOARD.map((col) => {
+        const items = rows.filter((r) => column(r) === col.id);
+        return (
+          <section key={col.id} aria-label={col.label} className="rounded-card border border-border bg-surface-2 p-2">
+            <h2 className="px-2 py-1 text-sm font-medium">
+              {col.label} <span className="text-muted">({items.length})</span>
+            </h2>
+            <ul className="space-y-2">
+              {items.map((r) => (
+                <li key={r.id}>
+                  <button type="button" onClick={() => onOpen(r.id)} className="w-full rounded-card border border-border bg-surface p-3 text-left text-sm">
+                    <span className={`font-medium ${r.severity === 'critical' ? 'text-danger' : ''}`}>{r.severity}</span> · {r.category.replaceAll('_', ' ')}
+                    <span className="block text-muted">
+                      {r.reportedName}
+                      {r.overdue ? ' · overdue' : ''}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }

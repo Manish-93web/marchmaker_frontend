@@ -2,6 +2,7 @@ import { formatInr } from '@marchmaker/shared';
 import { Banner, Button, Card, Skeleton } from '@marchmaker/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { BarsChart, TrendChart } from '../components/Charts';
 import { api } from '../lib/api';
 import { errorMessage } from '../lib/session';
 
@@ -43,18 +44,6 @@ interface Overview {
     topPaths: { path: string; views: number }[];
     exposures: { experiment: string; variant: string; visitors: number }[];
   };
-}
-
-/** A small line chart with a text alternative; no chart library needed for one series. */
-function Sparkline({ values, label }: { values: number[]; label: string }) {
-  if (values.length < 2) return <p className="text-sm text-muted">Not enough days yet.</p>;
-  const max = Math.max(...values, 1);
-  const pts = values.map((v, i) => `${(i / (values.length - 1)) * 100},${30 - (v / max) * 28}`).join(' ');
-  return (
-    <svg viewBox="0 0 100 32" role="img" aria-label={label} className="h-16 w-full text-primary" preserveAspectRatio="none">
-      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-    </svg>
-  );
 }
 
 function Stat({ label, value, note }: { label: string; value: string | number; note?: string }) {
@@ -147,7 +136,7 @@ export function Insights() {
             </div>
             <Card>
               <p className="text-sm text-muted">Net revenue by day</p>
-              <Sparkline values={d.revenue.daily.map((x) => x.netPaise)} label={`Net revenue by day, ${d.revenue.daily.length} days`} />
+              <TrendChart points={d.revenue.daily.map((x) => ({ label: x.day.slice(5), value: x.netPaise / 100 }))} label={`Net revenue by day, ${d.revenue.daily.length} days`} format={(n) => `₹${Math.round(n)}`} />
             </Card>
           </section>
 
@@ -222,6 +211,7 @@ export function Insights() {
               </div>
             )}
           </section>
+          <RelevanceReport />
         </>
       )}
     </div>
@@ -392,5 +382,60 @@ export function StoryReview() {
       {q.data?.items.length === 0 && <p className="text-muted">No stories waiting.</p>}
       <ul className="space-y-4">{q.data?.items.map((s) => <StoryCard key={s.id} s={s} />)}</ul>
     </div>
+  );
+}
+
+interface Relevance {
+  days: number;
+  responses: number;
+  averageRating: number | null;
+  metRate: number | null;
+  meetingResponses: number;
+  byMatchmaker: { reviewerId: string; name: string; responses: number; averageRating: number | null }[];
+  bySignal: { signal: string; high: number | null; low: number | null }[];
+  learned: { at: string; samples: number; delta: Record<string, number> } | null;
+}
+
+/** How well introductions are landing: member ratings and "did you meet?" answers, by matchmaker and by signal. */
+export function RelevanceReport() {
+  const q = useQuery({ queryKey: ['relevance'], queryFn: () => api<Relevance>('/admin/reports/relevance?days=90') });
+  const d = q.data;
+  if (q.isError) return null;
+  if (!d?.bySignal || !d.byMatchmaker) return <Skeleton className="h-32" />;
+  return (
+    <section aria-labelledby="relevance" className="space-y-3">
+      <h2 id="relevance" className="font-display text-lg">
+        Introduction relevance (last {d.days} days)
+      </h2>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Stat label="Feedback received" value={d.responses} />
+        <Stat label="Average rating" value={d.averageRating ?? '–'} note="out of 5" />
+        <Stat label="Pairs who met" value={d.metRate === null ? '–' : `${Math.round(d.metRate * 100)}%`} note={`${d.meetingResponses} answers`} />
+        <Stat label="Learned weights" value={d.learned && d.learned.samples >= 30 ? 'On' : 'Waiting'} note={d.learned ? `${d.learned.samples} samples` : 'no data yet'} />
+      </div>
+      <BarsChart label="Average rating by matchmaker" points={d.byMatchmaker.map((m) => ({ label: `${m.name} (${m.responses})`, value: m.averageRating ?? 0 }))} />
+      <table className="w-full text-left text-sm">
+        <caption className="sr-only">Average rating when a signal is high or low</caption>
+        <thead>
+          <tr>
+            <th scope="col" className="py-1">Signal</th>
+            <th scope="col">High (0.7+)</th>
+            <th scope="col">Lower</th>
+            <th scope="col">Weight nudge</th>
+          </tr>
+        </thead>
+        <tbody>
+          {d.bySignal.map((s) => (
+            <tr key={s.signal} className="border-t border-border">
+              <td className="py-1">{s.signal}</td>
+              <td>{s.high ?? '–'}</td>
+              <td>{s.low ?? '–'}</td>
+              <td>{d.learned ? (d.learned.delta[s.signal] ?? 0).toFixed(3) : '–'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="text-xs text-muted">Nudges are capped at 0.05 per weight and only apply with at least 30 ratings. Turn them off with "useFeedback" in matching settings.</p>
+    </section>
   );
 }
