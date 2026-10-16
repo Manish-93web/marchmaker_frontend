@@ -66,6 +66,8 @@ export const verification = {
     start: 'Start instant verification',
     or: 'or upload your documents yourself',
     unavailable: 'Instant verification is busy right now. Please upload your documents.',
+    checking: 'We are waiting for the result from our partner. This page updates by itself; you can also come back later.',
+    returned: 'Welcome back. We are checking your result now.',
   },
   badges: { id: 'ID verified', selfie: 'Selfie verified', phone: 'Phone verified', email: 'Email verified' },
 };

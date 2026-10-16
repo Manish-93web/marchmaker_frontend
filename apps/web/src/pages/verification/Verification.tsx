@@ -119,6 +119,8 @@ export function Verification() {
     queryFn: () => api<VerificationStatus>('/verification/status'),
     staleTime: 0,
     refetchOnWindowFocus: true,
+    // Coming back from the partner's hosted page, the result arrives a moment later: check every few seconds.
+    refetchInterval: (query) => (query.state.data?.method === 'kyc' && query.state.data.state === 'pending' ? 5_000 : false),
   });
   const [docType, setDocType] = useState<string>('');
   const [last4, setLast4] = useState('');
@@ -236,6 +238,11 @@ export function Verification() {
         <Card className="mt-6 space-y-3" aria-live="polite">
           <h2 className="font-display text-xl">{copy}</h2>
           <p className="text-muted">{t(`v.state.${s.state}.body`)}</p>
+          {s.method === 'kyc' && s.state === 'pending' && (
+            <p role="status" className="text-sm">
+              {t('v.kyc.checking')}
+            </p>
+          )}
           <Badges badges={s.badges} />
         </Card>
       </div>

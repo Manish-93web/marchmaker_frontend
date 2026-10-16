@@ -16,7 +16,7 @@ interface Status {
 }
 interface Report {
   sample: boolean;
-  chart: { sunSign: string; moonSign: string; ascendant: string; nakshatra: string; highlights: string[] };
+  chart: { sunSign: string; moonSign: string; ascendant: string; nakshatra: string; manglik?: 'yes' | 'partial' | 'no' | 'unknown'; highlights: string[] };
   disclaimer: string;
 }
 
@@ -160,6 +160,12 @@ export function Astrology() {
                 <dd className="text-lg">{v}</dd>
               </div>
             ))}
+            {report.data.chart.manglik && (
+              <div>
+                <dt className="text-xs text-muted">{t('x.astro.manglik')}</dt>
+                <dd className="text-lg">{t(`x.astro.manglikValues.${report.data.chart.manglik}`)}</dd>
+              </div>
+            )}
           </dl>
           {report.data.sample && <Banner tone="warning">{t('x.astro.sample')}</Banner>}
           <p className="text-xs text-muted">{report.data.disclaimer}</p>

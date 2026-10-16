@@ -15,6 +15,7 @@ export const en = {
     cancel: 'Cancel',
     continue: 'Continue',
     somethingWrong: 'Something went wrong. Please try again.',
+    language: 'Language',
     offline: 'You appear to be offline. Please check your connection.',
   },
   auth: {

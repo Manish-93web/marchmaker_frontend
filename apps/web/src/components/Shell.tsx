@@ -11,6 +11,7 @@ import { useTheme } from '../lib/theme';
 import { ConsentBanner } from './marketing/ConsentBanner';
 import { Footer } from './marketing/Footer';
 import { organizationLd } from './marketing/Seo';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 const LINKS = [
   ['/how-it-works', 'm.nav.howItWorks'],
@@ -64,6 +65,7 @@ export function Shell() {
           </ul>
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="sm"

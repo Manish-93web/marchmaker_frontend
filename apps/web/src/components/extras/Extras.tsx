@@ -110,7 +110,13 @@ export function VoicePanel({ intro }: { intro: IntroCard }) {
 
 interface Match {
   sample: boolean;
-  result: { points: number; maxPoints: number; summary: string };
+  result: {
+    points: number;
+    maxPoints: number;
+    summary: string;
+    gunaVerdict?: 'excellent' | 'good' | 'average' | 'below_minimum';
+    manglik?: { a: string; b: string; balanced: boolean | null };
+  };
   disclaimer: string;
 }
 
@@ -137,8 +143,17 @@ export function AstrologyMatch({ introductionId }: { introductionId: string }) {
       {q.isError && <p className="text-sm text-muted">{t('x.astro.matchNotReady')}</p>}
       {q.data && (
         <>
-          <p className="font-display text-xl">{t('x.astro.matchPoints', { points: q.data.result.points, max: q.data.result.maxPoints })}</p>
+          <h4 className="text-sm font-medium">{t('x.astro.guna')}</h4>
+          <p className="font-display text-xl">
+            {q.data.result.gunaVerdict ? t(`x.astro.gunaVerdict.${q.data.result.gunaVerdict}`) : t('x.astro.matchPoints', { points: q.data.result.points, max: q.data.result.maxPoints })}
+          </p>
+          <p className="text-sm text-muted">{t('x.astro.matchPoints', { points: q.data.result.points, max: q.data.result.maxPoints })}. {t('x.astro.gunaNote')}</p>
           <p className="text-sm">{q.data.result.summary}</p>
+          {q.data.result.manglik && (
+            <p className="text-sm" data-testid="manglik">
+              {q.data.result.manglik.balanced === null ? t('x.astro.manglikUnknown') : q.data.result.manglik.balanced ? t('x.astro.manglikBalanced') : t('x.astro.manglikNotBalanced')}
+            </p>
+          )}
           {q.data.sample && <Banner tone="warning">{t('x.astro.sample')}</Banner>}
           <p className="text-xs text-muted">{q.data.disclaimer}</p>
         </>
