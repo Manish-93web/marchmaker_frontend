@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: marchmaker_frontend
+      # @marchmaker/shared is linked from the sibling backend repo.
+      - uses: actions/checkout@v4
+        with:
+          repository: Manish-93web/marchmaker_backend
+          path: marchmaker_backend
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build shared package
+        working-directory: marchmaker_backend
+        run: pnpm install --frozen-lockfile && pnpm --filter @marchmaker/shared build
+      - name: Frontend checks
+        working-directory: marchmaker_frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm typecheck
+          pnpm test
+          node scripts/contrast.mjs | (! grep -q FAIL)
+          pnpm audit --prod --audit-level=high
+          pnpm --filter @marchmaker/web build
+          pnpm --filter @marchmaker/admin build
+
+  e2e:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: marchmaker_frontend
+      - uses: actions/checkout@v4
+        with:
+          repository: Manish-93web/marchmaker_backend
+          path: marchmaker_backend
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install and build the shared package
+        working-directory: marchmaker_backend
+        run: pnpm install --frozen-lockfile && pnpm --filter @marchmaker/shared build
+      - name: Install the frontend and a browser
+        working-directory: marchmaker_frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @marchmaker/e2e exec playwright install --with-deps chromium
+      - name: Browser end-to-end tests
+        working-directory: marchmaker_frontend
+        env:
+          CI: 'true'
+        run: pnpm --filter @marchmaker/e2e test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: marchmaker_frontend/apps/e2e/playwright-report

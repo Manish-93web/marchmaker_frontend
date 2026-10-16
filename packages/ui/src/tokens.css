@@ -1,0 +1,130 @@
+/* Marchmaker design tokens. Light is default; dark follows system unless data-theme is set. */
+:root {
+  --mm-bg: #fbf7f2;
+  --mm-surface: #ffffff;
+  --mm-surface-2: #f6efe8;
+  --mm-ink: #1e1a1d;
+  --mm-muted: #6b6168;
+  --mm-border: #ede4dc;
+
+  --mm-primary: #4a1d3f;
+  --mm-primary-fg: #ffffff;
+  --mm-accent: #f2a33a;
+  --mm-accent-2: #e2725b;
+  --mm-accent-fg: #1e1a1d;
+  --mm-secondary: #2f6f6a;
+  --mm-secondary-fg: #ffffff;
+
+  --mm-success: #2e7d5b;
+  --mm-warning: #946200;
+  --mm-danger: #c2413b;
+  --mm-danger-fg: #ffffff;
+  --mm-info: #3a6ea5;
+
+  --mm-ring: #4a1d3f;
+  --mm-radius-card: 12px;
+  --mm-radius-hero: 24px;
+  --mm-radius-pill: 999px;
+
+  --mm-shadow-sm: 0 1px 2px rgb(74 29 63 / 0.06), 0 1px 1px rgb(74 29 63 / 0.04);
+  --mm-shadow-md: 0 4px 12px rgb(74 29 63 / 0.08), 0 2px 4px rgb(74 29 63 / 0.05);
+  --mm-shadow-lg: 0 16px 40px rgb(74 29 63 / 0.14), 0 4px 10px rgb(74 29 63 / 0.06);
+
+  --mm-gradient-cta: linear-gradient(135deg, #f2a33a 0%, #e2725b 100%);
+
+  --mm-font-display: 'Fraunces', 'Instrument Serif', Georgia, serif;
+  --mm-font-body: 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif;
+  --mm-font-hindi: 'Noto Sans Devanagari', 'Plus Jakarta Sans', sans-serif;
+
+  --mm-text-xs: clamp(0.75rem, 0.73rem + 0.1vw, 0.8125rem);
+  --mm-text-sm: clamp(0.875rem, 0.85rem + 0.12vw, 0.9375rem);
+  --mm-text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --mm-text-lg: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem);
+  --mm-text-xl: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --mm-text-2xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+  --mm-text-3xl: clamp(2.25rem, 1.6rem + 3vw, 3.75rem);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --mm-bg: #160b14;
+    --mm-surface: #20131e;
+    --mm-surface-2: #2a1a27;
+    --mm-ink: #f4ebf1;
+    --mm-muted: #b9a9b4;
+    --mm-border: #3a2837;
+    --mm-primary: #e9c6dd;
+    --mm-primary-fg: #160b14;
+    --mm-accent-fg: #1e1a1d;
+    --mm-secondary: #7cc4bd;
+    --mm-secondary-fg: #0f2220;
+    --mm-success: #5fc596;
+    --mm-warning: #e3b24a;
+    --mm-danger: #f0847e;
+    --mm-danger-fg: #160b14;
+    --mm-info: #7fb0e3;
+    --mm-ring: #e9c6dd;
+    --mm-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --mm-shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
+    --mm-shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55);
+  }
+}
+
+:root[data-theme='dark'] {
+  --mm-bg: #160b14;
+  --mm-surface: #20131e;
+  --mm-surface-2: #2a1a27;
+  --mm-ink: #f4ebf1;
+  --mm-muted: #b9a9b4;
+  --mm-border: #3a2837;
+  --mm-primary: #e9c6dd;
+  --mm-primary-fg: #160b14;
+  --mm-accent-fg: #1e1a1d;
+  --mm-secondary: #7cc4bd;
+  --mm-secondary-fg: #0f2220;
+  --mm-success: #5fc596;
+  --mm-warning: #e3b24a;
+  --mm-danger: #f0847e;
+  --mm-danger-fg: #160b14;
+  --mm-info: #7fb0e3;
+  --mm-ring: #e9c6dd;
+  --mm-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --mm-shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
+  --mm-shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55);
+}
+
+html {
+  background: var(--mm-bg);
+  color: var(--mm-ink);
+  font-family: var(--mm-font-body);
+  font-size: var(--mm-text-base);
+  -webkit-font-smoothing: antialiased;
+}
+html:lang(hi) {
+  font-family: var(--mm-font-hindi);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mm-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes mm-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

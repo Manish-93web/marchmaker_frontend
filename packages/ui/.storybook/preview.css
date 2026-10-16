@@ -1,0 +1,2 @@
+@import '../src/tokens.css';
+body { font-family: var(--mm-font-body); background: var(--mm-bg); color: var(--mm-ink); padding: 1rem; }
