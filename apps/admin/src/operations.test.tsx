@@ -13,7 +13,7 @@ interface Call {
 let calls: Call[];
 let routes: Record<string, { status: number; body: unknown }>;
 
-const ALL = ['jobs.manage', 'data_requests.approve', 'legal.manage', 'content.manage', 'settings.manage', 'payment.view', 'introduction.view', 'moderation.view', 'moderation.act', 'support.view', 'support.reply', 'member.search', 'member.view_basic'];
+const ALL = ['jobs.manage', 'data_requests.approve', 'legal.manage', 'content.manage', 'settings.manage', 'payment.view', 'introduction.view', 'moderation.view', 'moderation.act', 'support.view', 'support.reply', 'member.search', 'member.view_basic', 'messages.view_reported', 'audit.view'];
 const ME = { status: 200, body: { id: 'me1', email: 'a@example.com', firstName: 'Ana', roles: ['super_admin'], permissions: ALL, mfa: true, twoFactorEnabled: true } };
 
 beforeEach(() => {
@@ -139,5 +139,24 @@ describe('introductions monitor', () => {
     mount('/introductions');
     expect(await screen.findByText('Not opened for 2 days')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Asha' })).toHaveAttribute('href', '/members/a');
+  });
+});
+
+describe('member detail tabs for introductions, messages and audit', () => {
+  it('explains when messages are not available and shows the introduction history', async () => {
+    routes['/admin/members/m1'] = {
+      status: 200,
+      body: { canViewFull: true, overview: { id: 'm1', firstName: 'Asha', email: null, emailVerified: true, phone: null, phoneVerified: false, gender: 'woman', age: 30, status: 'active', journeyState: 'matching_active', plan: { planCode: 'free', status: 'none' }, creditBalance: 0, referralCode: null, createdAt: new Date().toISOString(), lastActiveAt: null, verification: { id: true, selfie: true, liveness: false }, moderation: null }, verification: [] },
+    };
+    routes['/admin/members/m1/introductions'] = { status: 200, body: { items: [{ id: 'i1', with: { id: 'm2', name: 'Ravi' }, state: 'mutually_accepted', myStatus: 'accepted', theirStatus: 'accepted', releasedAt: new Date().toISOString(), unlockedAt: null, closedReason: null }] } };
+    routes['/admin/members/m1/messages'] = { status: 200, body: { available: false, threads: [] } };
+    routes['/admin/audit'] = { status: 200, body: { items: [{ id: 'a1', at: new Date().toISOString(), action: 'member.suspended', actorId: 'abcdef123456' }] } };
+    mount('/members/m1');
+    await userEvent.click(await screen.findByRole('tab', { name: 'Introductions' }));
+    expect(await screen.findByRole('link', { name: 'Ravi' })).toHaveAttribute('href', '/members/m2');
+    await userEvent.click(screen.getByRole('tab', { name: 'Messages' }));
+    expect(await screen.findByText(/only when this member is part of a report/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: 'Audit' }));
+    expect(await screen.findByText('member.suspended')).toBeInTheDocument();
   });
 });

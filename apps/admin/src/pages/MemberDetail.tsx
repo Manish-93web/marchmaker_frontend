@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
 import { can, errorMessage, useStaff } from '../lib/session';
-import { FeedbackTab, FinanceTab, LedgersTab, SafetyTab, TicketsTab } from './MemberTabs';
+import { AuditTab, FeedbackTab, FinanceTab, IntroductionsTab, LedgersTab, MessagesTab, SafetyTab, TicketsTab } from './MemberTabs';
 
 interface Detail {
   canViewFull: boolean;
@@ -45,8 +45,8 @@ interface Note {
   createdAt: string;
 }
 
-const TABS = ['Overview', 'Profile', 'Preferences', 'Assessments', 'Photos', 'Verification', 'Finance', 'Ledgers', 'Safety', 'Tickets', 'Feedback', 'Notes'] as const;
-const TAB_PERM: Partial<Record<(typeof TABS)[number], string>> = { Finance: 'payment.view', Ledgers: 'payment.view', Safety: 'moderation.view', Tickets: 'support.view', Feedback: 'member.view_full' };
+const TABS = ['Overview', 'Profile', 'Preferences', 'Assessments', 'Photos', 'Verification', 'Introductions', 'Messages', 'Finance', 'Ledgers', 'Safety', 'Tickets', 'Feedback', 'Audit', 'Notes'] as const;
+const TAB_PERM: Partial<Record<(typeof TABS)[number], string>> = { Finance: 'payment.view', Ledgers: 'payment.view', Safety: 'moderation.view', Tickets: 'support.view', Feedback: 'member.view_full', Introductions: 'introduction.view', Messages: 'messages.view_reported', Audit: 'audit.view' };
 type Tab = (typeof TABS)[number];
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '–');
 
@@ -274,7 +274,7 @@ export function MemberDetail() {
   const d = q.data;
   const o = d.overview;
   const restricted = ['suspended', 'banned', 'paused'].includes(o.status);
-  const visible = TABS.filter((t) => (d.canViewFull || ['Overview', 'Verification', 'Notes', 'Finance', 'Ledgers', 'Safety', 'Tickets'].includes(t)) && (!TAB_PERM[t] || can(me, TAB_PERM[t]!)));
+  const visible = TABS.filter((t) => (d.canViewFull || ['Overview', 'Verification', 'Notes', 'Finance', 'Ledgers', 'Safety', 'Tickets', 'Introductions', 'Messages', 'Audit'].includes(t)) && (!TAB_PERM[t] || can(me, TAB_PERM[t]!)));
 
   return (
     <div className="space-y-6">
@@ -469,6 +469,9 @@ export function MemberDetail() {
           </Card>
         )}
 
+        {tab === 'Introductions' && <IntroductionsTab id={id} />}
+        {tab === 'Messages' && <MessagesTab id={id} />}
+        {tab === 'Audit' && <AuditTab id={id} />}
         {tab === 'Finance' && <FinanceTab id={id} />}
         {tab === 'Ledgers' && <LedgersTab id={id} />}
         {tab === 'Safety' && <SafetyTab id={id} />}

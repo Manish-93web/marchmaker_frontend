@@ -182,3 +182,72 @@ export function FeedbackTab({ id }: { id: string }) {
     </div>
   );
 }
+
+export function IntroductionsTab({ id }: { id: string }) {
+  const q = useQuery({ queryKey: ['member-intros', id], queryFn: () => api<{ items: { id: string; with: { id: string | null; name: string }; state: string; myStatus: string | null; theirStatus: string | null; releasedAt: string; unlockedAt: string | null; closedReason: string | null }[] }>(`/admin/members/${id}/introductions`) });
+  if (q.isLoading) return <Skeleton className="h-32" />;
+  return (
+    <Card>
+      <Table
+        caption="Introductions"
+        heads={['With', 'State', 'This member', 'The other', 'Released', 'Unlocked']}
+        rows={(q.data?.items ?? []).map((i) => [
+          i.with.id ? (
+            <Link key={i.id} className="underline" to={`/members/${i.with.id}`}>
+              {i.with.name}
+            </Link>
+          ) : (
+            i.with.name
+          ),
+          i.state.replace(/_/g, ' ') + (i.closedReason ? ` (${i.closedReason})` : ''),
+          i.myStatus ?? '–',
+          i.theirStatus ?? '–',
+          when(i.releasedAt),
+          when(i.unlockedAt),
+        ])}
+        empty="No introductions."
+      />
+    </Card>
+  );
+}
+
+/** Private conversations appear only for a reported pair, and opening this tab is recorded in the audit log. */
+export function MessagesTab({ id }: { id: string }) {
+  const q = useQuery({
+    queryKey: ['member-messages', id],
+    queryFn: () => api<{ available: boolean; threads: { threadId: string; messages: { id: string; mine: boolean; body: string; at: string }[] }[] }>(`/admin/members/${id}/messages`),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+  if (q.isLoading) return <Skeleton className="h-32" />;
+  if (!q.data?.available) return <p className="text-sm text-muted">Messages can be read only when this member is part of a report. There is none.</p>;
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted">This view is recorded in the audit log.</p>
+      {q.data.threads.map((t) => (
+        <Card key={t.threadId}>
+          <ol className="space-y-2 text-sm">
+            {t.messages.map((m) => (
+              <li key={m.id} className={`rounded p-2 ${m.mine ? 'bg-surface-2' : 'border border-border'}`}>
+                <span className="text-xs text-muted">
+                  {m.mine ? 'This member' : 'The other person'} · {when(m.at)}
+                </span>
+                <p className="whitespace-pre-wrap">{m.body}</p>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+export function AuditTab({ id }: { id: string }) {
+  const q = useQuery({ queryKey: ['member-audit', id], queryFn: () => api<{ items: { id: string; at: string; action: string; actorId: string | null }[] }>(`/admin/audit?subject=${id}&limit=50`) });
+  if (q.isLoading) return <Skeleton className="h-32" />;
+  return (
+    <Card>
+      <Table caption="Audit trail" heads={['When', 'Action', 'By']} rows={(q.data?.items ?? []).map((a) => [when(a.at), a.action, a.actorId ? a.actorId.slice(-6) : 'system'])} empty="Nothing recorded." />
+    </Card>
+  );
+}
