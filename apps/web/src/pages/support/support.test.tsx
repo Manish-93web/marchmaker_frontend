@@ -79,12 +79,13 @@ describe('support', () => {
         number: 'T-000001',
         category: 'billing',
         subject: 'Charged twice',
-        status: 'waiting_on_member',
+        status: 'awaiting_member',
+        rating: null,
         lastMessageAt: new Date().toISOString(),
         lastMessageBy: 'staff',
         messages: [
-          { id: 'a', author: 'member', body: 'I was charged twice.', at: new Date().toISOString() },
-          { id: 'b', author: 'staff', body: 'Sorry! Refunded.', at: new Date().toISOString() },
+          { id: 'a', author: 'member', body: 'I was charged twice.', at: new Date().toISOString(), attachments: [] },
+          { id: 'b', author: 'staff', body: 'Sorry! Refunded.', at: new Date().toISOString(), attachments: [{ name: 'refund.pdf', contentType: 'application/pdf', url: 'https://files.example/refund.pdf' }] },
         ],
       },
     };
@@ -92,9 +93,36 @@ describe('support', () => {
     mount('/support/tk1');
     expect(await screen.findByText('Sorry! Refunded.')).toBeInTheDocument();
     expect(screen.getByText(/Marchmaker team/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open attachment' })).toHaveAttribute('href', 'https://files.example/refund.pdf');
     await userEvent.type(screen.getByLabelText('Reply'), 'Thank you');
     await userEvent.click(screen.getByRole('button', { name: 'Send' }));
-    await waitFor(() => expect(calls.find((c) => c.url.endsWith('/reply'))?.body).toEqual({ body: 'Thank you' }));
+    await waitFor(() => expect(calls.find((c) => c.url.endsWith('/reply'))?.body).toEqual({ body: 'Thank you', attachments: [] }));
+  });
+});
+
+describe('rating a resolved conversation', () => {
+  it('asks once, with real radio buttons, and sends the score', async () => {
+    routes['/support/tickets/tk2'] = {
+      status: 200,
+      body: { id: 'tk2', number: 'T-000002', category: 'account', subject: 'Done', status: 'resolved', rating: null, lastMessageAt: new Date().toISOString(), lastMessageBy: 'staff', messages: [] },
+    };
+    routes['POST /support/tickets/tk2/rating'] = { status: 200, body: { rated: true } };
+    mount('/support/tk2');
+    const send = await screen.findByRole('button', { name: 'Send my rating' });
+    expect(send).toBeDisabled();
+    await userEvent.click(screen.getByLabelText('4 out of 5'));
+    await userEvent.click(send);
+    await waitFor(() => expect(calls.find((c) => c.url.endsWith('/rating'))?.body).toMatchObject({ rating: 4 }));
+  });
+
+  it('shows an existing rating instead of asking again', async () => {
+    routes['/support/tickets/tk3'] = {
+      status: 200,
+      body: { id: 'tk3', number: 'T-000003', category: 'account', subject: 'Done', status: 'closed', rating: 5, lastMessageAt: new Date().toISOString(), lastMessageBy: 'staff', messages: [] },
+    };
+    mount('/support/tk3');
+    expect(await screen.findByText(/You rated this conversation 5 out of 5/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Send my rating' })).toBeNull();
   });
 });
 

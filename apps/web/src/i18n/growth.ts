@@ -1,6 +1,14 @@
 export const growth = {
   feedback: {
-    title: 'How is it going?',
+    title_checkin: 'How is it going?',
+    title_closed: 'Before you go',
+    title_meeting: 'Did you get to meet?',
+    intro_checkin: 'This is just for us. It helps our team send you better introductions. The other person never sees it.',
+    intro_closed: 'You ended this conversation. A quick note helps us understand what was missing. The other person is never told.',
+    intro_meeting: 'It has been a few weeks. We would love to know whether the two of you met. It stays private.',
+    met: 'Did the two of you meet in person?',
+    metYes: 'Yes, we met',
+    metNo: 'Not yet',
     intro: 'This is just for us. It helps our team send you better introductions. The other person never sees it.',
     rating: 'How well did this introduction fit what you are looking for?',
     ratingN: '{{n}} out of 5',
@@ -25,6 +33,8 @@ export const growth = {
   },
   cards: {
     checkin: 'It has been a week since you both said yes. How is it going?',
+    closed: 'You ended a conversation recently. Would you tell us how it went?',
+    meeting: 'Did you get to meet? We would love to know.',
     checkinCta: 'Tell us',
     updatePrefs: 'Review my preferences',
   },

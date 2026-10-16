@@ -56,6 +56,7 @@ describe('feedback sheet', () => {
     expect(await screen.findByText('Thank you. This really helps.')).toBeInTheDocument();
     expect(calls.find((c) => c.method === 'POST')?.body).toEqual({
       introductionId: 'a'.repeat(24),
+      stage: 'checkin',
       rating: 4,
       tags: ['kind'],
       note: 'Lovely call',
@@ -68,6 +69,26 @@ describe('feedback sheet', () => {
   });
 });
 
+describe('feedback stages', () => {
+  it('asks "did you meet?" without a rating and sends the answer', async () => {
+    routes['POST /feedback/introductions'] = { status: 201, body: { received: true } };
+    wrap(<FeedbackSheet introductionId={'a'.repeat(24)} stage="meeting" onClose={() => undefined} />);
+    expect(screen.queryByRole('radio', { name: '4 out of 5' })).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Share' }));
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('radio', { name: 'Yes, we met' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Share' }));
+    await screen.findByText('Thank you. This really helps.');
+    expect(calls.find((c) => c.method === 'POST')?.body).toMatchObject({ stage: 'meeting', met: true });
+  });
+
+  it('thanks the member after ending a conversation, with the rating question', async () => {
+    wrap(<FeedbackSheet introductionId={'a'.repeat(24)} stage="closed" onClose={() => undefined} />);
+    expect(screen.getByText('Before you go')).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: '3 out of 5' })).toBeInTheDocument();
+  });
+});
+
 describe('dashboard nudges', () => {
   it('shows a check-in and a preference suggestion, and nothing otherwise', async () => {
     routes['/feedback/pending'] = { status: 200, body: { items: [{ introductionId: 'i1' }] } };
@@ -77,7 +98,7 @@ describe('dashboard nudges', () => {
     };
     wrap(<GrowthCards />);
     expect(await screen.findByText('Location keeps coming up')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Tell us' })).toHaveAttribute('href', '/introductions/i1?feedback=1');
+    expect(screen.getByRole('link', { name: 'Tell us' })).toHaveAttribute('href', '/introductions/i1?feedback=checkin');
   });
 
   it('renders nothing when there is nothing to say', async () => {

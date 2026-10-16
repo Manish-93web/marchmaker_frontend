@@ -1,22 +1,24 @@
 import { TICKET_CATEGORIES, ticketCreateSchema, appealSchema, type TicketCategory } from '@marchmaker/shared';
 import { Banner, Button, Card, EmptyState, Input, Skeleton, Textarea } from '@marchmaker/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, ApiRequestError } from '../../lib/api';
+import { AttachmentPicker, type UploadedFile } from '../../components/support/Attachments';
 
 interface TicketRow {
   id: string;
   number: string;
   category: string;
   subject: string;
-  status: 'open' | 'waiting_on_member' | 'resolved' | 'closed';
+  status: 'open' | 'awaiting_member' | 'awaiting_team' | 'resolved' | 'closed';
   lastMessageAt: string;
   lastMessageBy: 'member' | 'staff' | null;
 }
 interface TicketDetailView extends TicketRow {
-  messages: { id: string; author: 'member' | 'staff' | 'system'; body: string; at: string }[];
+  rating: number | null;
+  messages: { id: string; author: 'member' | 'staff' | 'system'; body: string; at: string; attachments: { name: string; contentType: string; url: string }[] }[];
 }
 
 const when = (iso: string) =>
@@ -33,14 +35,16 @@ export function SupportHome() {
   const [category, setCategory] = useState<TicketCategory>('account');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const create = useMutation({
-    mutationFn: (v: { category: TicketCategory; subject: string; body: string }) =>
+    mutationFn: (v: { category: TicketCategory; subject: string; body: string; attachments: string[] }) =>
       api<{ id: string }>('/support/tickets', { method: 'POST', body: v }),
     onSuccess: (r) => {
       setSubject('');
       setBody('');
+      setFiles([]);
       void qc.invalidateQueries({ queryKey: ['support', 'tickets'] });
       nav(`/support/${r.id}`);
     },
@@ -49,7 +53,7 @@ export function SupportHome() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    const parsed = ticketCreateSchema.safeParse({ category, subject, body });
+    const parsed = ticketCreateSchema.safeParse({ category, subject, body, attachments: files.map((f) => f.key) });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? t('common.somethingWrong'));
       return;
@@ -91,6 +95,7 @@ export function SupportHome() {
           </label>
           <Input label={t('s.subject')} value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={120} />
           <Textarea label={t('s.body')} value={body} onChange={(e) => setBody(e.target.value)} rows={5} maxLength={4000} />
+          <AttachmentPicker scope="ticket" files={files} onChange={setFiles} allowPdf />
           {error && (
             <p role="alert" className="text-sm text-danger">
               {error}
@@ -146,18 +151,31 @@ export function TicketDetail() {
   const { id = '' } = useParams();
   const qc = useQueryClient();
   const [text, setText] = useState('');
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [live, setLive] = useState(false);
   const q = useQuery({ queryKey: ['support', 'ticket', id], queryFn: () => api<TicketDetailView>(`/support/tickets/${id}`) });
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ['support'] });
   };
   const reply = useMutation({
-    mutationFn: () => api(`/support/tickets/${id}/reply`, { method: 'POST', body: { body: text.trim() } }),
+    mutationFn: () => api(`/support/tickets/${id}/reply`, { method: 'POST', body: { body: text.trim(), attachments: files.map((f) => f.key) } }),
     onSuccess: () => {
       setText('');
+      setFiles([]);
       refresh();
     },
   });
   const close = useMutation({ mutationFn: () => api(`/support/tickets/${id}/close`, { method: 'POST' }), onSuccess: refresh });
+
+  // The team's reply appears without a refresh. The stream carries no text: it only says "something changed".
+  useEffect(() => {
+    if (typeof EventSource === 'undefined' || !id) return;
+    const es = new EventSource(`/api/v1/support/tickets/${id}/stream`, { withCredentials: true });
+    es.addEventListener('ready', () => setLive(true));
+    es.addEventListener('message', () => void qc.invalidateQueries({ queryKey: ['support'] }));
+    es.onerror = () => setLive(false);
+    return () => es.close();
+  }, [id, qc]);
 
   if (q.isLoading) return <div className="container py-10"><Skeleton className="h-48" /></div>;
   if (q.isError || !q.data) {
@@ -190,9 +208,22 @@ export function TicketDetail() {
               {m.author === 'staff' ? t('s.team') : t('s.you')} · {when(m.at)}
             </p>
             <p className="mt-1 whitespace-pre-wrap">{m.body}</p>
+            {m.attachments?.length > 0 && (
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {m.attachments.map((a) => (
+                  <li key={a.url}>
+                    <a className="underline" href={a.url} target="_blank" rel="noopener noreferrer">
+                      {t('s.attach.open')}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ol>
+      {live && !closed && <p className="text-xs text-muted">{t('s.live')}</p>}
+      {(k.status === 'resolved' || closed) && <RatingBox ticketId={id} existing={k.rating} onDone={refresh} />}
       {closed ? (
         <Banner tone="info">{t('s.closedNote')}</Banner>
       ) : (
@@ -204,6 +235,7 @@ export function TicketDetail() {
           }}
         >
           <Textarea label={t('s.reply')} placeholder={t('s.replyPlaceholder')} value={text} onChange={(e) => setText(e.target.value)} rows={4} maxLength={4000} />
+          <AttachmentPicker scope="ticket" files={files} onChange={setFiles} allowPdf />
           <div className="flex gap-2">
             <Button type="submit" loading={reply.isPending} disabled={!text.trim()}>
               {t('s.send')}
@@ -267,5 +299,43 @@ export function Appeal() {
         </>
       )}
     </div>
+  );
+}
+
+/** One rating after a conversation is resolved. The stars are real radio buttons, so a keyboard and a screen reader work. */
+function RatingBox({ ticketId, existing, onDone }: { ticketId: string; existing: number | null; onDone: () => void }) {
+  const { t } = useTranslation();
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const send = useMutation({
+    mutationFn: () => api(`/support/tickets/${ticketId}/rating`, { method: 'POST', body: { rating, comment: comment.trim() || undefined } }),
+    onSuccess: onDone,
+  });
+  if (existing) return <p className="text-sm text-muted">{t('s.rating.yours', { n: existing })}</p>;
+  if (send.isSuccess) return <Banner tone="success">{t('s.rating.thanks')}</Banner>;
+  return (
+    <Card>
+      <fieldset>
+        <legend className="font-display text-lg">{t('s.rating.title')}</legend>
+        <p className="text-sm text-muted">{t('s.rating.prompt')}</p>
+        <div className="mt-2 flex gap-1">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <label key={n} className={`grid min-h-[44px] min-w-[44px] cursor-pointer place-items-center rounded-card border text-lg ${rating >= n ? 'border-accent bg-accent text-accent-fg' : 'border-border'}`}>
+              <input type="radio" name="rating" className="sr-only" checked={rating === n} onChange={() => setRating(n)} aria-label={t('s.rating.stars', { n })} />
+              <span aria-hidden="true">★</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <Textarea label={t('s.rating.comment')} value={comment} onChange={(e) => setComment(e.target.value)} rows={2} maxLength={500} />
+      {send.isError && (
+        <p role="alert" className="text-sm text-danger">
+          {errText(send.error, t('common.somethingWrong'))}
+        </p>
+      )}
+      <Button className="mt-3" disabled={!rating} loading={send.isPending} onClick={() => send.mutate()}>
+        {t('s.rating.send')}
+      </Button>
+    </Card>
   );
 }

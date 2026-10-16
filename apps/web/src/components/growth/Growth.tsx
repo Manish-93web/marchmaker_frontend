@@ -8,10 +8,11 @@ import { api, ApiRequestError } from '../../lib/api';
 import { Sheet } from '../introductions/Parts';
 
 /** Quick, optional note after an introduction has had time to go somewhere. */
-export function FeedbackSheet({ introductionId, onClose }: { introductionId: string; onClose: () => void }) {
+export function FeedbackSheet({ introductionId, stage = 'checkin', onClose }: { introductionId: string; stage?: 'checkin' | 'closed' | 'meeting'; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [rating, setRating] = useState(0);
+  const [met, setMet] = useState<boolean | null>(null);
   const [tags, setTags] = useState<FeedbackTag[]>([]);
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,14 @@ export function FeedbackSheet({ introductionId, onClose }: { introductionId: str
     setTags((cur) => (cur.includes(tag) ? cur.filter((x) => x !== tag) : cur.length < 4 ? [...cur, tag] : cur));
 
   const submit = () => {
-    const parsed = introFeedbackSchema.safeParse({ introductionId, rating, tags, note: note.trim() || undefined });
+    const parsed = introFeedbackSchema.safeParse({
+      introductionId,
+      stage,
+      rating: rating || undefined,
+      met: met ?? undefined,
+      tags: stage === 'meeting' ? [] : tags,
+      note: note.trim() || undefined,
+    });
     if (!parsed.success) {
       setError(t('g.feedback.pickRating'));
       return;
@@ -40,7 +48,7 @@ export function FeedbackSheet({ introductionId, onClose }: { introductionId: str
   };
 
   return (
-    <Sheet title={t('g.feedback.title')} onClose={onClose} labelledBy="feedback-title">
+    <Sheet title={t(`g.feedback.title_${stage}`)} onClose={onClose} labelledBy="feedback-title">
       {done ? (
         <>
           <p role="status">{t('g.feedback.thanks')}</p>
@@ -50,7 +58,27 @@ export function FeedbackSheet({ introductionId, onClose }: { introductionId: str
         </>
       ) : (
         <>
-          <p className="text-sm text-muted">{t('g.feedback.intro')}</p>
+          <p className="text-sm text-muted">{t(`g.feedback.intro_${stage}`)}</p>
+          {stage === 'meeting' && (
+            <fieldset>
+              <legend className="mb-2 text-sm font-medium">{t('g.feedback.met')}</legend>
+              <div className="flex gap-2" role="radiogroup" aria-label={t('g.feedback.met')}>
+                {([true, false] as const).map((v) => (
+                  <button
+                    key={String(v)}
+                    type="button"
+                    role="radio"
+                    aria-checked={met === v}
+                    onClick={() => setMet(v)}
+                    className={`min-h-[44px] rounded-pill border px-5 ${met === v ? 'border-accent bg-accent text-accent-fg' : 'border-border bg-surface'}`}
+                  >
+                    {t(v ? 'g.feedback.metYes' : 'g.feedback.metNo')}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          {stage !== 'meeting' && (
           <fieldset>
             <legend className="mb-2 text-sm font-medium">{t('g.feedback.rating')}</legend>
             <div className="flex gap-2" role="radiogroup" aria-label={t('g.feedback.rating')}>
@@ -70,6 +98,8 @@ export function FeedbackSheet({ introductionId, onClose }: { introductionId: str
             </div>
             <p className="mt-1 text-xs text-muted">{t('g.feedback.scale')}</p>
           </fieldset>
+          )}
+          {stage !== 'meeting' && (
           <fieldset>
             <legend className="mb-2 text-sm font-medium">{t('g.feedback.tags')}</legend>
             <div className="flex flex-wrap gap-2">
@@ -80,6 +110,7 @@ export function FeedbackSheet({ introductionId, onClose }: { introductionId: str
               ))}
             </div>
           </fieldset>
+          )}
           <Textarea label={t('g.feedback.note')} value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} />
           {error && (
             <p role="alert" className="text-sm text-danger">
@@ -103,7 +134,7 @@ export function FeedbackSheet({ introductionId, onClose }: { introductionId: str
 /** Dashboard nudges: check-ins that are due, a gentle preference suggestion, and a way to share a story. */
 export function GrowthCards() {
   const { t } = useTranslation();
-  const pending = useQuery({ queryKey: ['feedback', 'pending'], queryFn: () => api<{ items: { introductionId: string }[] }>('/feedback/pending'), retry: 0 });
+  const pending = useQuery({ queryKey: ['feedback', 'pending'], queryFn: () => api<{ items: { introductionId: string; stage: 'checkin' | 'closed' | 'meeting' }[] }>('/feedback/pending'), retry: 0 });
   const hints = useQuery({ queryKey: ['feedback', 'hints'], queryFn: () => api<{ items: PreferenceHint[] }>('/feedback/hints'), retry: 0 });
   const due = pending.data?.items ?? [];
   const hint = hints.data?.items[0];
@@ -112,9 +143,9 @@ export function GrowthCards() {
   return (
     <div className="space-y-3">
       {due.slice(0, 2).map((p) => (
-        <Banner key={p.introductionId} tone="info">
-          <span className="font-medium">{t('g.cards.checkin')}</span>{' '}
-          <Link className="underline" to={`/introductions/${p.introductionId}?feedback=1`}>
+        <Banner key={`${p.introductionId}-${p.stage}`} tone="info">
+          <span className="font-medium">{t(`g.cards.${p.stage ?? 'checkin'}`)}</span>{' '}
+          <Link className="underline" to={`/introductions/${p.introductionId}?feedback=${p.stage ?? 'checkin'}`}>
             {t('g.cards.checkinCta')}
           </Link>
         </Banner>

@@ -15,8 +15,42 @@ export const isIos = () => typeof navigator !== 'undefined' && /iphone|ipad|ipod
 export function registerServiceWorker() {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator) || import.meta.env.DEV) return;
   window.addEventListener('load', () => {
-    void navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+    void navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => {
+        const announce = () => {
+          if (reg.waiting && navigator.serviceWorker.controller) notifyUpdate(() => reg.waiting?.postMessage({ type: 'SKIP_WAITING' }));
+        };
+        announce();
+        reg.addEventListener('updatefound', () => {
+          const w = reg.installing;
+          w?.addEventListener('statechange', () => {
+            if (w.state === 'installed') announce();
+          });
+        });
+        // Check for a newer version when the app is opened again after a while.
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') void reg.update().catch(() => undefined);
+        });
+      })
+      .catch(() => undefined);
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
   });
+}
+
+type UpdateHandler = (apply: () => void) => void;
+let handler: UpdateHandler | null = null;
+/** The UI registers how to ask the person; until then an available update waits quietly. */
+export function onUpdateAvailable(h: UpdateHandler) {
+  handler = h;
+}
+function notifyUpdate(apply: () => void) {
+  handler?.(apply);
 }
 
 /** Captures the browser's install prompt so the app can offer it at a calm moment. */

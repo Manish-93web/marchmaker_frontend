@@ -106,7 +106,11 @@ export function IntroductionDetail() {
   const qc = useQueryClient();
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [feedbackOpen, setFeedbackOpen] = useState(params.get('feedback') === '1');
+  const feedbackStage = ((): 'checkin' | 'closed' | 'meeting' => {
+    const f = params.get('feedback');
+    return f === 'closed' || f === 'meeting' ? f : 'checkin';
+  })();
+  const [feedbackOpen, setFeedbackOpen] = useState(Boolean(params.get('feedback')));
   const reduce = useReducedMotion();
   const q = useQuery({ queryKey: introKey(id), queryFn: () => api<IntroCard>(`/introductions/${id}`), staleTime: 0 });
   const intro = q.data;
@@ -168,8 +172,8 @@ export function IntroductionDetail() {
     onSuccess: set,
   });
   const report = useMutation({
-    mutationFn: async (v: { category: string; details?: string; alsoBlock: boolean }) => {
-      await api('/reports', { method: 'POST', body: { introductionId: id, category: v.category, details: v.details } });
+    mutationFn: async (v: { category: string; details?: string; alsoBlock: boolean; evidence: string[] }) => {
+      await api('/reports', { method: 'POST', body: { introductionId: id, category: v.category, details: v.details, evidence: v.evidence } });
       if (v.alsoBlock) await api('/blocks', { method: 'POST', body: { introductionId: id } });
       return v.alsoBlock;
     },
@@ -442,6 +446,7 @@ export function IntroductionDetail() {
 
       {feedbackOpen && unlocked && (
         <FeedbackSheet
+          stage={feedbackStage}
           introductionId={id}
           onClose={() => {
             setFeedbackOpen(false);
@@ -474,7 +479,7 @@ export function IntroductionDetail() {
           busy={report.isPending}
           done={reported}
           error={error}
-          onSubmit={(category, details, alsoBlock) => report.mutate({ category, details, alsoBlock })}
+          onSubmit={(category, details, alsoBlock, evidence) => report.mutate({ category, details, alsoBlock, evidence })}
           onBlock={() => setSheet('block')}
           onClose={() => {
             setSheet(null);

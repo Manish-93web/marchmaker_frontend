@@ -3,7 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { Check, CheckCheck, ShieldAlert } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { messageProblems } from '@marchmaker/shared';
 import { Sheet } from '../../components/introductions/Parts';
 import { api, ApiRequestError } from '../../lib/api';
@@ -95,6 +95,7 @@ export function Conversation() {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState(false);
+  const [confirmEnd, setConfirmEnd] = useState(false);
 
   const q = useInfiniteQuery({
     queryKey: ['thread', id],
@@ -107,6 +108,11 @@ export function Conversation() {
   // Pages arrive newest first; show them oldest to newest.
   const all = useMemo(() => [...(q.data?.pages ?? [])].reverse().flatMap((p) => p.items), [q.data]);
   const head = q.data?.pages[0];
+  const nav = useNavigate();
+  const end = useMutation({
+    mutationFn: () => api(`/threads/${id}/end`, { method: 'POST' }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['thread', id] }),
+  });
 
   useEffect(() => {
     bottom.current?.scrollIntoView?.({ block: 'end' });
@@ -157,6 +163,11 @@ export function Conversation() {
               {t('i.actions.share')}
             </Button>
           </Link>
+          {head.status !== 'closed' && (
+            <Button size="sm" variant="ghost" onClick={() => setConfirmEnd(true)}>
+              {t('i.messages.end')}
+            </Button>
+          )}
           <Button size="sm" variant="ghost" aria-label={t('i.actions.report')} onClick={() => setReport(true)}>
             <ShieldAlert className="h-4 w-4" aria-hidden />
           </Button>
@@ -248,6 +259,27 @@ export function Conversation() {
           </div>
           <p className="mt-1 text-xs text-muted">{t('i.messages.contactHint')}</p>
         </form>
+      )}
+
+      {confirmEnd && (
+        <Sheet title={t('i.messages.endTitle')} onClose={() => setConfirmEnd(false)}>
+          <p className="text-sm text-muted">{t('i.messages.endBody')}</p>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setConfirmEnd(false)}>
+              {t('i.actions.cancel')}
+            </Button>
+            <Button
+              loading={end.isPending}
+              onClick={() =>
+                end.mutate(undefined, {
+                  onSuccess: () => nav(`/introductions/${head.introductionId}?feedback=closed`),
+                })
+              }
+            >
+              {t('i.messages.endConfirm')}
+            </Button>
+          </div>
+        </Sheet>
       )}
 
       {report && (

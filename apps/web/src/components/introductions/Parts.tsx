@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { DECLINE_REASONS, REPORT_CATEGORIES } from '@marchmaker/shared';
 import { firstNoteProblems } from '@marchmaker/shared';
 import type { IntroCard } from '../../lib/introductions';
+import { AttachmentPicker, type UploadedFile } from '../support/Attachments';
 
 /** Photo that stays soft until the introduction is unlocked. */
 export function BlurredPhoto({ src, name, unlocked }: { src: string | null; name: string; unlocked?: boolean }) {
@@ -228,7 +229,7 @@ export function ReportSheet({
   busy: boolean;
   done: boolean;
   error: string | null;
-  onSubmit: (category: string, details: string | undefined, alsoBlock: boolean) => void;
+  onSubmit: (category: string, details: string | undefined, alsoBlock: boolean, evidence: string[]) => void;
   onBlock: () => void;
   onClose: () => void;
 }) {
@@ -236,6 +237,7 @@ export function ReportSheet({
   const [category, setCategory] = useState<string>('');
   const [details, setDetails] = useState('');
   const [alsoBlock, setAlsoBlock] = useState(false);
+  const [evidence, setEvidence] = useState<UploadedFile[]>([]);
   if (done) {
     return (
       <Sheet title={t('i.safety.reportTitle')} onClose={onClose}>
@@ -269,6 +271,11 @@ export function ReportSheet({
           className="mt-1 min-h-[80px] w-full rounded-card border border-border bg-surface p-3"
         />
       </label>
+      <div>
+        <p className="text-sm font-medium">{t('i.safety.evidence')}</p>
+        <p className="mb-1 text-xs text-muted">{t('i.safety.evidenceHint')}</p>
+        <AttachmentPicker scope="report" files={evidence} onChange={setEvidence} />
+      </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={alsoBlock} onChange={(e) => setAlsoBlock(e.target.checked)} />
         {t('i.safety.alsoBlock')}
@@ -282,7 +289,7 @@ export function ReportSheet({
           <Button variant="ghost" onClick={onClose}>
             {t('i.actions.cancel')}
           </Button>
-          <Button loading={busy} disabled={!category} onClick={() => onSubmit(category, details.trim() || undefined, alsoBlock)}>
+          <Button loading={busy} disabled={!category} onClick={() => onSubmit(category, details.trim() || undefined, alsoBlock, evidence.map((f) => f.key))}>
             {t('i.safety.submit')}
           </Button>
         </div>

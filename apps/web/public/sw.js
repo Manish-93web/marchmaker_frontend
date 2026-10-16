@@ -5,11 +5,16 @@
  * It deliberately caches nothing else: introductions, messages and account data always come
  * from the network and are never stored by the worker.
  */
-const CACHE = 'mm-shell-v1';
+const CACHE = 'mm-shell-v2';
 const OFFLINE_URL = '/offline.html';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.add(OFFLINE_URL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE)    .then((c) => c.add(OFFLINE_URL)));
+  // The new worker waits until the person chooses to update (see the "new version" prompt), so a page is never swapped mid-task.
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

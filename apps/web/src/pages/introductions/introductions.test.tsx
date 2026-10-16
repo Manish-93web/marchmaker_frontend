@@ -264,7 +264,7 @@ describe('introduction detail', () => {
     expect(calls.find((c) => c.url.endsWith('/reports'))?.body).toEqual({
       introductionId: ID,
       category: 'scam_money_request',
-      details: undefined,
+      evidence: [],
     });
     expect(await screen.findByText(/Our team will look into this/)).toBeInTheDocument();
   });
