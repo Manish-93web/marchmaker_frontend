@@ -54,10 +54,10 @@ export function Shell() {
             Marchmaker
           </Link>
 
-          <ul className="hidden items-center gap-1 lg:flex">
+          <ul className={me ? 'hidden items-center gap-1 2xl:flex' : 'hidden items-center gap-1 xl:flex'}>
             {LINKS.map(([to, key]) => (
               <li key={to}>
-                <Link to={to} className="rounded-pill px-3 py-2 text-sm text-ink hover:bg-surface-2">
+                <Link to={to} className="whitespace-nowrap rounded-pill px-3 py-2 text-sm text-ink hover:bg-surface-2">
                   {t(key)}
                 </Link>
               </li>
@@ -65,10 +65,13 @@ export function Shell() {
           </ul>
 
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
+            <span className="hidden sm:inline-flex">
+              <LanguageSwitcher />
+            </span>
             <Button
               variant="ghost"
               size="sm"
+              className="hidden sm:inline-flex"
               aria-label={`${t('theme.label')}: ${dark ? t('theme.dark') : t('theme.light')}`}
               onClick={() => setTheme(dark ? 'light' : 'dark')}
             >
@@ -91,28 +94,30 @@ export function Shell() {
                     </span>
                   )}
                 </Link>
-                <Link to="/introductions" className="hidden px-2 text-sm sm:inline">
+                <Link to="/introductions" className="hidden whitespace-nowrap px-2 text-sm lg:inline">
                   {t('i.title')}
                 </Link>
-                <Link to="/messages" className="hidden px-2 text-sm sm:inline">
+                <Link to="/messages" className="hidden whitespace-nowrap px-2 text-sm lg:inline">
                   {t('i.messages.title')}
                 </Link>
-                <Link to="/dashboard" className="hidden px-2 text-sm sm:inline">
+                <Link to="/dashboard" className="hidden whitespace-nowrap px-2 text-sm lg:inline">
                   {t('nav.dashboard')}
                 </Link>
-                <Link to="/referrals" className="hidden px-2 text-sm sm:inline">
-                  {t('r.nav')}
-                </Link>
-                <Link to="/support" className="hidden px-2 text-sm sm:inline">
-                  {t('s.nav')}
-                </Link>
-                <Link to="/billing" className="hidden px-2 text-sm sm:inline">
-                  {t('nav.billing')}
-                </Link>
-                <Link to="/settings" className="hidden px-2 text-sm sm:inline">
-                  {t('nav.settings')}
-                </Link>
-                <Button variant="outline" size="sm" loading={logout.isPending} onClick={() => logout.mutate()}>
+                <AccountMenu
+                  label={t('nav.account')}
+                  signOut={{ label: t('nav.signOut'), run: () => logout.mutate() }}
+                  items={[
+                    ['/introductions', t('i.title'), 'lg:hidden'],
+                    ['/messages', t('i.messages.title'), 'lg:hidden'],
+                    ['/dashboard', t('nav.dashboard'), 'lg:hidden'],
+                    ['/referrals', t('r.nav'), ''],
+                    ['/support', t('s.nav'), ''],
+                    ['/safety-centre', t('s.centre.title'), ''],
+                    ['/billing', t('nav.billing'), ''],
+                    ['/settings', t('nav.settings'), ''],
+                  ]}
+                />
+                <Button variant="outline" size="sm" className="hidden sm:inline-flex" loading={logout.isPending} onClick={() => logout.mutate()}>
                   {t('nav.signOut')}
                 </Button>
               </>
@@ -131,7 +136,7 @@ export function Shell() {
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden"
+              className={me ? '2xl:hidden' : 'xl:hidden'}
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? t('m.nav.close') : t('m.nav.menu')}
@@ -142,7 +147,7 @@ export function Shell() {
           </div>
         </nav>
         {open && (
-          <div id="mobile-menu" className="border-t border-border bg-surface lg:hidden">
+          <div id="mobile-menu" className={me ? 'border-t border-border bg-surface 2xl:hidden' : 'border-t border-border bg-surface xl:hidden'}>
             <ul className="container py-2">
               {LINKS.map(([to, key]) => (
                 <li key={to}>
@@ -151,6 +156,12 @@ export function Shell() {
                   </Link>
                 </li>
               ))}
+              <li className="flex items-center gap-3 py-2 sm:hidden">
+                <LanguageSwitcher />
+                <Button variant="ghost" size="sm" aria-label={`${t('theme.label')}: ${dark ? t('theme.dark') : t('theme.light')}`} onClick={() => setTheme(dark ? 'light' : 'dark')}>
+                  {dark ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
+                </Button>
+              </li>
               {!me && (
                 <li>
                   <Link to="/login" onClick={() => setOpen(false)} className="block min-h-[44px] py-3 text-ink">
@@ -168,5 +179,28 @@ export function Shell() {
       <Footer />
       <ConsentBanner />
     </>
+  );
+}
+
+/** Less-used pages live in one menu, so the header stays on a single line at every width. */
+function AccountMenu({ label, items, signOut }: { label: string; items: [to: string, text: string, hide: string][]; signOut: { label: string; run: () => void } }) {
+  return (
+    <details className="relative">
+      <summary className="flex min-h-[44px] cursor-pointer list-none items-center rounded-pill px-3 text-sm hover:bg-surface-2 [&::-webkit-details-marker]:hidden">{label}</summary>
+      <ul className="absolute right-0 z-50 mt-1 w-52 rounded-card border border-border bg-surface p-1 shadow-lg">
+        {items.map(([to, text, hide]) => (
+          <li key={to} className={hide}>
+            <Link to={to} className="block min-h-[44px] rounded px-3 py-3 text-sm hover:bg-surface-2">
+              {text}
+            </Link>
+          </li>
+        ))}
+        <li className="sm:hidden">
+          <button type="button" onClick={signOut.run} className="block min-h-[44px] w-full rounded px-3 py-3 text-left text-sm hover:bg-surface-2">
+            {signOut.label}
+          </button>
+        </li>
+      </ul>
+    </details>
   );
 }

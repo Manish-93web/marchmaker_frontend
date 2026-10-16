@@ -24,7 +24,7 @@ export function SavedFilters({ current, onApply }: { current: Record<string, str
   const del = useMutation({ mutationFn: (id: string) => api(`/admin/saved-filters/${id}`, { method: 'DELETE' }), onSuccess: () => qc.invalidateQueries({ queryKey: ['saved-filters'] }) });
   const hasFilter = Object.values(current).some(Boolean);
   return (
-    <div className="flex flex-wrap items-end gap-2" aria-label="Saved searches">
+    <div role="group" className="flex flex-wrap items-end gap-2" aria-label="Saved searches">
       {list.data?.items.map((f) => (
         <span key={f.id} className="inline-flex items-center rounded-pill border border-border bg-surface">
           <button type="button" className="min-h-[36px] px-3 text-sm" onClick={() => onApply(Object.fromEntries(Object.entries(f.query).map(([k, v]) => [k, String(v)])))}>

@@ -133,7 +133,7 @@ export function ComparisonTable({ plans }: { plans: PlanDefinition[] }) {
     { label: 'Dedicated matchmaker', value: (p) => (p.code === 'concierge' ? 'Yes' : 'No') },
   ];
   return (
-    <div className="overflow-x-auto rounded-card border border-border">
+    <div className="overflow-x-auto rounded-card border border-border" tabIndex={0} role="region" aria-label={t("m.pricing.comparisonTable")}>
       <table className="w-full min-w-[560px] border-collapse text-left text-sm">
         <caption className="sr-only">{t('m.pricing.comparisonTitle')}</caption>
         <thead className="bg-surface-2">

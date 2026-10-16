@@ -33,6 +33,7 @@ export const marketing = {
       { title: 'Meet on your terms', body: 'Receive a small number of introductions with a clear reason why. Photos and contact details open only when you both say yes.' },
     ],
     compareTitle: 'Why human review',
+    compareTable: 'Comparison of swipe apps and Marchmaker (scrollable table)',
     compareSubtitle: 'Algorithms are good at filtering. People are good at judgement.',
     compareHeaders: { feature: '', swipe: 'Swipe apps', us: 'Marchmaker' },
     compareRows: [
@@ -118,6 +119,7 @@ export const marketing = {
     packsTitle: 'Need just one or two?',
     packsBody: 'Introduction packs never expire while your account is active.',
     comparisonTitle: 'Compare plans',
+    comparisonTable: 'Plan comparison table (scrollable)',
     feature: 'Feature',
     loadError: 'Showing our standard prices. Live prices could not be loaded.',
   },

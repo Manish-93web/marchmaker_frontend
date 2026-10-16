@@ -1,5 +1,5 @@
 export const en = {
-  nav: { howItWorks: 'How it works', pricing: 'Pricing', safety: 'Safety', signIn: 'Sign in', join: 'Get started', dashboard: 'Dashboard', settings: 'Settings', billing: 'Billing', signOut: 'Sign out' },
+  nav: { howItWorks: 'How it works', pricing: 'Pricing', safety: 'Safety', signIn: 'Sign in', join: 'Get started', dashboard: 'Dashboard', settings: 'Settings', billing: 'Billing', signOut: 'Sign out', account: 'Account' },
   hero: {
     title: 'Fewer introductions. Better ones.',
     subtitle: 'Every match is reviewed by a real person before you ever see it.',

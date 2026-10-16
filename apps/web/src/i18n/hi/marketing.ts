@@ -35,6 +35,7 @@ export const hiMarketing: DeepPartial<Marketing> = {
       { title: 'अपनी शर्तों पर मिलें', body: 'कम संख्या में परिचय पाएँ, साफ़ कारण के साथ। तस्वीरें और संपर्क विवरण तभी खुलते हैं जब आप दोनों हाँ कहें।' },
     ],
     compareTitle: 'मानवीय समीक्षा क्यों',
+    compareTable: 'स्वाइप ऐप और मार्चमेकर की तुलना (स्क्रॉल होने वाली तालिका)',
     compareSubtitle: 'एल्गोरिद्म छाँटने में अच्छे हैं। विवेक में इंसान अच्छे हैं।',
     compareHeaders: { feature: '', swipe: 'स्वाइप ऐप', us: 'मार्चमेकर' },
     compareRows: [
@@ -118,6 +119,7 @@ export const hiMarketing: DeepPartial<Marketing> = {
     packsTitle: 'बस एक-दो चाहिए?',
     packsBody: 'परिचय पैक आपका खाता चालू रहने तक समाप्त नहीं होते।',
     comparisonTitle: 'प्लान की तुलना करें',
+    comparisonTable: 'प्लान तुलना तालिका (स्क्रॉल होने वाली)',
     feature: 'सुविधा',
     loadError: 'हमारे सामान्य मूल्य दिखा रहे हैं। लाइव मूल्य लोड नहीं हो सके।',
   },

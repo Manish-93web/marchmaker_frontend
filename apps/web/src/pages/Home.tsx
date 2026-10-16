@@ -103,7 +103,7 @@ export function Home() {
       </Section>
 
       <Section id="human" tone="soft" title={t('m.home.compareTitle')} subtitle={t('m.home.compareSubtitle')}>
-        <div className="overflow-x-auto rounded-card border border-border bg-surface">
+        <div className="overflow-x-auto rounded-card border border-border bg-surface" tabIndex={0} role="region" aria-label={t("m.home.compareTable")}>
           <table className="w-full min-w-[520px] border-collapse text-left text-sm">
             <caption className="sr-only">{t('m.home.compareTitle')}</caption>
             <thead>

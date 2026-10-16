@@ -2,7 +2,7 @@ import type { DeepPartial } from '../types';
 import type { en } from '../en';
 
 export const hi: DeepPartial<typeof en> = {
-  nav: { howItWorks: 'यह कैसे काम करता है', pricing: 'मूल्य', safety: 'सुरक्षा', signIn: 'साइन इन', join: 'शुरू करें', dashboard: 'डैशबोर्ड', settings: 'सेटिंग्स', billing: 'बिलिंग', signOut: 'साइन आउट' },
+  nav: { howItWorks: 'यह कैसे काम करता है', pricing: 'मूल्य', safety: 'सुरक्षा', signIn: 'साइन इन', join: 'शुरू करें', dashboard: 'डैशबोर्ड', settings: 'सेटिंग्स', billing: 'बिलिंग', signOut: 'साइन आउट', account: 'खाता' },
   hero: {
     title: 'कम परिचय। बेहतर परिचय।',
     subtitle: 'आपके देखने से पहले हर मैच की समीक्षा एक असली व्यक्ति करता है।',
