@@ -34,6 +34,7 @@ const Referrals = lazy(() => import('./pages/referrals/Referrals').then((m) => (
 const Stories = lazy(() => import('./pages/stories/Stories').then((m) => ({ default: m.Stories })));
 const GuidePage = lazy(() => import('./pages/guides/Guide').then((m) => ({ default: m.GuidePage })));
 const Astrology = lazy(() => import('./pages/astrology/Astrology').then((m) => ({ default: m.Astrology })));
+const SafetyCentre = lazy(() => import('./pages/support/SafetyCentre').then((m) => ({ default: m.SafetyCentre })));
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 
 const page = (el: ReactNode) => <Suspense fallback={<div className="container py-10" aria-busy="true" />}>{el}</Suspense>;
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
           { path: 'astrology', element: page(<Astrology />) },
           { path: 'stories', element: page(<Stories />) },
           { path: 'referrals', element: page(<Referrals />) },
+          { path: 'safety-centre', element: page(<SafetyCentre />) },
           { path: 'support', element: page(<SupportHome />) },
           { path: 'support/:id', element: page(<TicketDetail />) },
           { path: 'notifications', element: page(<NotificationsPage />) },

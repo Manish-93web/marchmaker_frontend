@@ -28,7 +28,7 @@ const SUMMARY_KEY = ['billing'] as const;
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 const errMsg = (e: unknown, fallback: string) => (e instanceof ApiRequestError ? e.message : fallback);
-const LIVE_STATES = ['active', 'pending', 'halted', 'authenticated'];
+const LIVE_STATES = ['active', 'pending', 'halted', 'authenticated', 'paused'];
 
 export function Billing() {
   const { t } = useTranslation();
@@ -46,6 +46,7 @@ export function Billing() {
   const [phase, setPhase] = useState<'idle' | 'paying' | 'confirming'>('idle');
   const [result, setResult] = useState<PayResult | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmPause, setConfirmPause] = useState(false);
   const [useWallet, setUseWallet] = useState(true);
 
   const summary = useQuery({ queryKey: SUMMARY_KEY, queryFn: () => api<BillingSummary>('/billing') });
@@ -91,6 +92,23 @@ export function Billing() {
     onSuccess: (r) => {
       toast.success(r.effective === 'now' ? t('b.upgraded', { count: r.extraCredits }) : t('b.scheduled'));
       refresh();
+    },
+    onError: (e) => toast.error(errMsg(e, t('common.somethingWrong'))),
+  });
+  const pause = useMutation({
+    mutationFn: () => api<{ accessUntil: string | null }>('/billing/subscriptions/pause', { method: 'POST' }),
+    onSuccess: (r) => {
+      toast.success(t('b.paused', { date: fmtDate(r.accessUntil) }));
+      setConfirmPause(false);
+      void qc.invalidateQueries({ queryKey: SUMMARY_KEY });
+    },
+    onError: (e) => toast.error(errMsg(e, t('common.somethingWrong'))),
+  });
+  const resume = useMutation({
+    mutationFn: () => api('/billing/subscriptions/resume', { method: 'POST' }),
+    onSuccess: () => {
+      toast.success(t('b.resumed'));
+      void qc.invalidateQueries({ queryKey: SUMMARY_KEY });
     },
     onError: (e) => toast.error(errMsg(e, t('common.somethingWrong'))),
   });
@@ -204,7 +222,36 @@ export function Billing() {
             {t('b.pendingChange', { plan: sub.pendingChange.planCode, date: fmtDate(sub.pendingChange.at) })}
           </p>
         )}
-        {sub && !sub.cancelAtPeriodEnd && (
+        {sub?.status === 'paused' && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm">{t('b.pausedNote')}</p>
+            <Button loading={resume.isPending} onClick={() => resume.mutate()}>
+              {t('b.resume')}
+            </Button>
+          </div>
+        )}
+        {sub && sub.status === 'active' && !sub.cancelAtPeriodEnd && (
+          <div className="mt-4">
+            {!confirmPause ? (
+              <Button variant="ghost" onClick={() => setConfirmPause(true)}>
+                {t('b.pause')}
+              </Button>
+            ) : (
+              <div className="space-y-3 rounded-card border border-border p-4">
+                <p className="text-sm">{t('b.pauseBody')}</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" loading={pause.isPending} onClick={() => pause.mutate()}>
+                    {t('b.pauseConfirm')}
+                  </Button>
+                  <Button variant="ghost" onClick={() => setConfirmPause(false)}>
+                    {t('b.cancelKeep')}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {sub && sub.status !== 'paused' && !sub.cancelAtPeriodEnd && (
           <div className="mt-4">
             {!confirmCancel ? (
               <Button variant="ghost" onClick={() => setConfirmCancel(true)}>

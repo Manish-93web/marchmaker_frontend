@@ -1,4 +1,25 @@
 export const support = {
+  centre: {
+    title: 'Safety centre',
+    intro: 'Your safety comes first. These are the quickest ways to get help, whatever is happening.',
+    helplines: 'Help in India, any time',
+    call: 'Call {{number}}',
+    steps: 'If something feels wrong',
+    stepsList: [
+      'Stop replying if you feel uncomfortable. You never have to explain yourself.',
+      'Use Report on the introduction or the conversation. Serious reports are read first and the other person is never told who reported.',
+      'Block the person if you want to stop all contact. It is quiet: they are not told.',
+      'Never send money or share one-time codes with anyone you met here.',
+    ],
+    report: 'Report a concern',
+    support: 'Talk to our team',
+    meeting: 'Before you meet',
+    meetingList: [
+      'Meet in a public place during the day and tell someone you trust where you are going.',
+      'Arrange your own travel. Share your live location with a family member.',
+      'Take your time. A good match will not mind you going slowly.',
+    ],
+  },
   appealLink: 'Appeal a decision',
   nav: 'Help',
   title: 'Help and support',

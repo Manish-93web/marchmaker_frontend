@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api, ApiRequestError } from '../../lib/api';
 import { useFlag } from '../../lib/flags';
 import { INTROS_KEY, introKey, type IntroCard } from '../../lib/introductions';
+import { InAppCall } from './InAppCall';
 
 interface Call {
   at: string;
@@ -70,9 +71,11 @@ export function VoicePanel({ intro }: { intro: IntroCard }) {
       <p className="text-xs text-muted">{t('x.voice.openHint')}</p>
       {intro.voice.iOptIn && !intro.voice.theyOptIn && <p className="text-sm">{t('x.voice.waiting')}</p>}
       {intro.voice.theyOptIn && !intro.voice.iOptIn && <p className="text-sm">{t('x.voice.theyAreOpen')}</p>}
+      {both && <InAppCall introId={id} enabled />}
       {both && (
         <div className="space-y-2">
-          <Button loading={call.isPending} onClick={() => call.mutate()}>
+          <p className="text-xs text-muted">{t('x.voice.orPhone')}</p>
+          <Button variant="outline" loading={call.isPending} onClick={() => call.mutate()}>
             {t('x.voice.call')}
           </Button>
           <p className="text-xs text-muted">{t('x.voice.hours')}</p>

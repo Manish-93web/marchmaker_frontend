@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Faq, PageHeader, Section } from '../../components/marketing/Blocks';
 import { faqLd, Seo } from '../../components/marketing/Seo';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../lib/api';
 
 interface Item {
   title: string;
@@ -86,7 +88,15 @@ export function Safety() {
 
 export function FaqPage() {
   const { t } = useTranslation();
-  const items = t('m.faq.items', { returnObjects: true }) as unknown as Qa[];
+  const builtIn = t('m.faq.items', { returnObjects: true }) as unknown as Qa[];
+  // The pre-rendered page shows the built-in answers (good for search engines); once published questions load, they replace them.
+  const live = useQuery({
+    queryKey: ['faqs'],
+    queryFn: () => api<{ items: { question: string; answer: string }[] }>('/faqs'),
+    staleTime: 5 * 60_000,
+    retry: 0,
+  });
+  const items: Qa[] = live.data && live.data.items.length ? live.data.items.map((f) => ({ q: f.question, a: f.answer })) : builtIn;
   return (
     <>
       <Seo title={t('m.faq.title')} description={t('m.site.description')} path="/faq" jsonLd={[faqLd(items)]} />

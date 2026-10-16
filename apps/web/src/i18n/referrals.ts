@@ -1,4 +1,7 @@
 export const referrals = {
+  qrTitle: 'Share in person',
+  qrAlt: 'QR code that opens your invitation link',
+  qrHint: 'Someone can scan this with their phone camera.',
   nav: 'Invite',
   invited: 'You were invited by a friend. Your welcome reward arrives after your first purchase.',
   title: 'Invite someone you trust',

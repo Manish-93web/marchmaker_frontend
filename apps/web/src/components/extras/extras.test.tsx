@@ -86,6 +86,32 @@ describe('guide page', () => {
   });
 });
 
+describe('guide listening progress', () => {
+  const page = () => (
+    <Routes>
+      <Route path="/guides/:slug" element={<GuidePage />} />
+    </Routes>
+  );
+
+  it('resumes from the saved position and speed, and saves a new speed', async () => {
+    routes['/guides/free'] = {
+      status: 200,
+      body: { slug: 'free', title: 'Free guide', summary: 's', category: null, access: 'free', allowed: true, bodyMarkdown: 'Words.', hasAudio: true, audioSeconds: 90 },
+    };
+    routes['/guides/free/audio'] = { status: 200, body: { url: 'https://cdn.example/a.mp3' } };
+    routes['/guide-progress/free'] = { status: 200, body: { positionSec: 42, speed: 1.5, completed: false } };
+    routes['PUT /guide-progress/free'] = { status: 200, body: {} };
+    wrap(page(), '/guides/free');
+    await screen.findByText('Words.');
+    await userEvent.click(screen.getByRole('button', { name: 'Load audio' }));
+    const speed = await screen.findByLabelText('Speed');
+    await waitFor(() => expect((speed as HTMLSelectElement).value).toBe('1.5'));
+    await waitFor(() => expect((document.querySelector('audio') as HTMLAudioElement).currentTime).toBe(42));
+    await userEvent.selectOptions(speed, '2');
+    await waitFor(() => expect(calls.find((c) => c.method === 'PUT')?.body).toMatchObject({ speed: 2 }));
+  });
+});
+
 describe('voice panel', () => {
   it('stays out of the way when the feature is off or the introduction is not unlocked', async () => {
     routes['/flags'] = { status: 200, body: { flags: { voice_calls: false } } };

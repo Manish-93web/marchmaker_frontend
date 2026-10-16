@@ -1,7 +1,7 @@
 import { formatInr } from '@marchmaker/shared';
 import { Banner, Button, Card, Skeleton } from '@marchmaker/ui';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
@@ -96,6 +96,7 @@ export function Referrals() {
               </a>
             )}
           </div>
+          <InviteQr link={v.link} />
           <p aria-live="polite" className="sr-only">
             {copied ? t('r.copied') : ''}
           </p>
@@ -175,5 +176,25 @@ export function Referrals() {
         </ul>
       </section>
     </div>
+  );
+}
+
+/** A QR code for the invitation link, drawn in the browser (the link never goes to a third-party service). */
+function InviteQr({ link }: { link: string }) {
+  const { t } = useTranslation();
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    void import('qrcode').then((m) => m.toDataURL(link, { margin: 1, width: 220, color: { dark: '#4A1D3F', light: '#FFFFFF' } })).then((u) => live && setSrc(u)).catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [link]);
+  if (!src) return null;
+  return (
+    <figure className="mt-4">
+      <img src={src} width={220} height={220} alt={t('r.qrAlt')} className="rounded-card border border-border" />
+      <figcaption className="mt-1 text-xs text-muted">{t('r.qrHint')}</figcaption>
+    </figure>
   );
 }

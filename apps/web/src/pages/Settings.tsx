@@ -1,4 +1,5 @@
 import { InstallCard } from '../components/extras/InstallCard';
+import { PhoneChange } from '../components/PhoneChange';
 import { Banner, Button, Card, Input } from '@marchmaker/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -90,6 +91,7 @@ export function Settings() {
     <div className="container max-w-3xl space-y-6 py-8">
       <h1 className="font-display text-2xl text-primary">{t('settings.title')}</h1>
       <InstallCard />
+      <PhoneChange masked={me.phoneMasked} verified={me.phoneVerified} />
 
       <Card className="space-y-4">
         <h2 className="font-medium">{t('settings.account')}</h2>

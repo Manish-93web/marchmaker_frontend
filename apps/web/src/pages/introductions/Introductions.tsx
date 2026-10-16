@@ -130,7 +130,7 @@ export function IntroductionDetail() {
     queryFn: () => api<{ firstName: string; email: string | null; phone: string | null }>(`/introductions/${id}/contact`),
   });
 
-  const [sheet, setSheet] = useState<null | 'note' | 'decline' | 'paywall' | 'report' | 'block'>(null);
+  const [sheet, setSheet] = useState<null | 'note' | 'decline' | 'paywall' | 'report' | 'block'>(params.get('report') === '1' ? 'report' : null);
   const [error, setError] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(false);
   const [reported, setReported] = useState(false);

@@ -1,7 +1,7 @@
 import { parseMarkdown, type Block, type Inline } from '@marchmaker/shared';
 import { Badge, Banner, Button, Skeleton } from '@marchmaker/ui';
 import { useQuery } from '@tanstack/react-query';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -87,6 +87,71 @@ export function GuideBody({ markdown }: { markdown: string }) {
   );
 }
 
+const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
+
+/** Picks up where the listener left off (on any device) and remembers the chosen speed. Signed-out visitors just listen. */
+function ResumableAudio({ slug, url, note }: { slug: string; url: string; note: string }) {
+  const { t } = useTranslation();
+  const el = useRef<HTMLAudioElement>(null);
+  const [speed, setSpeed] = useState(1);
+  const last = useRef(0);
+  const saved = useQuery({ queryKey: ['guide-progress', slug], retry: 0, staleTime: Infinity, queryFn: () => api<{ positionSec: number; speed: number; completed: boolean }>(`/guide-progress/${slug}`) });
+  const save = (extra: Partial<{ completed: boolean }> = {}) => {
+    const a = el.current;
+    if (!a || !saved.isSuccess) return;
+    void api(`/guide-progress/${slug}`, { method: 'PUT', body: { positionSec: Math.floor(a.currentTime), speed, ...extra } }).catch(() => undefined);
+  };
+  useEffect(() => {
+    const d = saved.data;
+    if (!d || !el.current) return;
+    setSpeed(d.speed);
+    el.current.playbackRate = d.speed;
+    if (d.positionSec > 5 && !d.completed) el.current.currentTime = d.positionSec;
+  }, [saved.data]);
+  return (
+    <div className="mt-2 space-y-2">
+      <audio
+        ref={el}
+        className="w-full"
+        controls
+        preload="metadata"
+        src={url}
+        onTimeUpdate={(e) => {
+          // Save about every 15 seconds while listening, not on every tick.
+          const now = Math.floor(e.currentTarget.currentTime);
+          if (now - last.current >= 15 || now < last.current) {
+            last.current = now;
+            save();
+          }
+        }}
+        onPause={() => save()}
+        onEnded={() => save({ completed: true })}
+      >
+        {note}
+      </audio>
+      <label className="flex items-center gap-2 text-sm">
+        {t('x.guide.speed')}
+        <select
+          className="min-h-[44px] rounded-input border border-border bg-surface px-3"
+          value={speed}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            setSpeed(v);
+            if (el.current) el.current.playbackRate = v;
+            void api(`/guide-progress/${slug}`, { method: 'PUT', body: { positionSec: Math.floor(el.current?.currentTime ?? 0), speed: v } }).catch(() => undefined);
+          }}
+        >
+          {SPEEDS.map((x) => (
+            <option key={x} value={x}>
+              {x}x
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+}
+
 function AudioPlayer({ slug }: { slug: string }) {
   const { t } = useTranslation();
   const [load, setLoad] = useState(false);
@@ -106,11 +171,7 @@ function AudioPlayer({ slug }: { slug: string }) {
           {t('x.guide.audioLoad')}
         </Button>
       )}
-      {q.data && (
-        <audio className="mt-2 w-full" controls preload="none" src={q.data.url}>
-          {t('x.guide.audioNote')}
-        </audio>
-      )}
+      {q.data && <ResumableAudio slug={slug} url={q.data.url} note={t('x.guide.audioNote')} />}
       {q.isError && <p className="mt-2 text-sm text-danger">{t('x.guide.audioError')}</p>}
       <p className="mt-2 text-xs text-muted">{t('x.guide.audioNote')}</p>
     </div>
