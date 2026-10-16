@@ -10,6 +10,8 @@ import { maxSavings, PlanGrid, IntervalToggle } from '../components/marketing/Pr
 import { faqLd, Seo } from '../components/marketing/Seo';
 import { api } from '../lib/api';
 import { usePlans } from '../lib/plans';
+import { HeroArt, StepArt } from '../components/marketing/Art';
+import { Testimonials } from '../components/marketing/Testimonials';
 
 interface Step {
   title: string;
@@ -73,6 +75,7 @@ export function Home() {
               </Link>
             </div>
           </motion.div>
+          <HeroArt className="pointer-events-none absolute right-4 top-10 hidden w-[22rem] opacity-90 lg:block" />
           <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Why members trust Marchmaker">
             {trust.map(({ icon: Icon, label }) => (
               <li key={label} className="flex items-center gap-2 rounded-card border border-border bg-surface px-4 py-3 text-sm">
@@ -89,9 +92,8 @@ export function Home() {
           {steps.map((s, i) => (
             <li key={s.title}>
               <Reveal delay={i * 0.06} className="h-full rounded-hero border border-border bg-surface p-6">
-                <span className="font-display text-2xl text-accent" aria-hidden>
-                  {i + 1}
-                </span>
+                <StepArt step={(i % 4) as 0 | 1 | 2 | 3} className="h-12 w-12 text-primary" />
+                <span className="sr-only">{i + 1}.</span>
                 <h3 className="mt-2 font-medium text-ink">{s.title}</h3>
                 <p className="mt-2 text-sm text-muted">{s.body}</p>
               </Reveal>
@@ -154,23 +156,7 @@ export function Home() {
 
       {stories.data && stories.data.items.length > 0 && (
         <Section id="stories" title={t('m.home.storiesTitle')}>
-          <ul
-            className="flex snap-x gap-4 overflow-x-auto pb-4"
-            tabIndex={0}
-            aria-label={t('m.home.storiesTitle')}
-          >
-            {stories.data.items.map((s) => (
-              <li key={s.id} className="w-[min(85vw,24rem)] shrink-0 snap-start">
-                <figure className="h-full rounded-hero border border-border bg-surface p-6">
-                  <blockquote className="font-display text-lg text-ink">“{s.quote}”</blockquote>
-                  <figcaption className="mt-4 text-sm text-muted">
-                    {s.coupleNames}
-                    {s.city ? `, ${s.city}` : ''}
-                  </figcaption>
-                </figure>
-              </li>
-            ))}
-          </ul>
+          <Testimonials label={t('m.home.storiesTitle')} items={stories.data.items} />
         </Section>
       )}
 

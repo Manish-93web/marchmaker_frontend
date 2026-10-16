@@ -1,7 +1,7 @@
-import { Badge, Banner, Button, Chip } from '@marchmaker/ui';
+import { Badge, Banner, Button, Chip, Dialog } from '@marchmaker/ui';
 import { motion, useReducedMotion } from 'framer-motion';
 import { BadgeCheck, Lock, MapPin, Briefcase } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DECLINE_REASONS, REPORT_CATEGORIES } from '@marchmaker/shared';
 import { firstNoteProblems } from '@marchmaker/shared';
@@ -77,32 +77,12 @@ export function PersonFacts({ person }: { person: IntroCard['person'] }) {
   );
 }
 
-/** Small sheet: a dialog on desktop, a bottom sheet on phones. */
-export function Sheet({ title, onClose, children, labelledBy = 'sheet-title' }: { title: string; onClose: () => void; children: ReactNode; labelledBy?: string }) {
-  const first = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    first.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+/** Small sheet: a dialog on desktop, a bottom sheet on phones. Focus is trapped and Escape closes it (Radix). */
+export function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode; labelledBy?: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-4" role="presentation" onClick={onClose}>
-      <div
-        ref={first}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={labelledBy}
-        onClick={(e) => e.stopPropagation()}
-        className="max-h-[92dvh] w-full max-w-lg space-y-4 overflow-y-auto rounded-t-hero bg-surface p-6 shadow-lg outline-none sm:rounded-hero"
-      >
-        <h2 id={labelledBy} className="font-display text-xl text-primary">
-          {title}
-        </h2>
-        {children}
-      </div>
-    </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()} title={title}>
+      {children}
+    </Dialog>
   );
 }
 

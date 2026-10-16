@@ -200,5 +200,6 @@ export const hiMarketing: DeepPartial<Marketing> = {
     learn: 'कुकी नीति',
     saved: 'आपका चुनाव सहेज लिया गया।',
   },
+  carousel: { prev: 'पिछली कहानी', next: 'अगली कहानी', slide: 'कहानी {{n}} / {{total}}' },
   cta: { signUp: 'शुरू करें', signIn: 'साइन इन' },
 };

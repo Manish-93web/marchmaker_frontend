@@ -5,6 +5,7 @@ import { Faq, PageHeader, Section } from '../../components/marketing/Blocks';
 import { faqLd, Seo } from '../../components/marketing/Seo';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { ShieldArt } from '../../components/marketing/Art';
 
 interface Item {
   title: string;
@@ -70,6 +71,7 @@ export function Safety() {
       <Seo title={t('m.safetyPage.title')} description={t('m.safetyPage.intro')} path="/safety" />
       <PageHeader title={t('m.safetyPage.title')} intro={t('m.safetyPage.intro')} />
       <Section>
+        <ShieldArt className="mb-8 hidden h-40 sm:block" />
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((p) => (
             <Card key={p.title}>

@@ -4,3 +4,6 @@ export { Input, Textarea, type InputProps, type TextareaProps } from './componen
 export { Card, Badge, Chip, Skeleton, EmptyState, ProgressRing, Banner } from './components/Display';
 export { OtpInput, type OtpInputProps } from './components/OtpInput';
 export { PasswordStrength, passwordStrength } from './components/PasswordStrength';
+export { Dialog, Sheet, ConfirmDialog, Tooltip, TooltipProvider } from './components/Overlays';
+export { Tabs, Accordion, Select, Avatar, type TabItem, type AccordionItem, type SelectOption } from './components/Navigation';
+export { StatTile, Timeline, PricingCard, AudioPlayer, NotificationBell, CommandPalette, type TimelineStep, type PricingCardProps, type PaletteCommand } from './components/Composite';

@@ -200,6 +200,7 @@ export const marketing = {
     learn: 'Cookie Policy',
     saved: 'Your choice is saved.',
   },
+  carousel: { prev: 'Previous story', next: 'Next story', slide: 'Story {{n}} of {{total}}' },
   cta: { signUp: 'Get started', signIn: 'Sign in' },
 };
 export type Marketing = typeof marketing;
