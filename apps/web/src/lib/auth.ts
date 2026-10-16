@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { JourneyState, TrackerStatus } from '@marchmaker/shared';
 import { api, ApiRequestError } from './api';
+import { adoptAccountLanguage } from '../i18n';
+import { adoptAccountTheme } from './theme';
 
 export interface Me {
   id: string;
@@ -18,6 +20,7 @@ export interface Me {
   creditBalance: number;
   referralCode: string;
   locale: string;
+  theme?: 'light' | 'dark' | 'system';
   hasPassword: boolean;
   twoFactorEnabled: boolean;
   mfa: boolean;
@@ -37,7 +40,10 @@ export function useMe() {
     staleTime: 60_000,
     queryFn: async (): Promise<Me | null> => {
       try {
-        return await api<Me>('/auth/me');
+        const me = await api<Me>('/auth/me');
+        adoptAccountTheme(me.theme);
+        adoptAccountLanguage(me.locale);
+        return me;
       } catch (e) {
         if (e instanceof ApiRequestError && e.status === 401) return null;
         throw e;

@@ -50,12 +50,24 @@ void i18n.use(initReactI18next).init({
 /** Switches language, remembers the choice and tells the browser and screen readers which language the page is in. */
 export function setLanguage(code: LanguageCode) {
   void i18n.changeLanguage(code);
+  // Signed-in members keep the language on every device; a failed save (signed out) is fine.
+  void import('../lib/api').then(({ api }) => api('/account', { method: 'PATCH', body: { locale: code === 'hi' ? 'hi-IN' : 'en-IN' } }).catch(() => undefined));
   try {
     localStorage.setItem(KEY, code);
   } catch {
     /* storage unavailable */
   }
 }
+/** After sign-in, use the account's language, unless this browser already has its own choice. */
+export function adoptAccountLanguage(locale: string | undefined) {
+  try {
+    if (localStorage.getItem(KEY)) return;
+  } catch {
+    return;
+  }
+  if (locale === 'hi-IN') void i18n.changeLanguage('hi');
+}
+
 if (typeof document !== 'undefined') {
   document.documentElement.lang = i18n.language;
   i18n.on('languageChanged', (l) => {

@@ -34,5 +34,20 @@ export const useTheme = create<ThemeState>((set) => ({
     }
     applyTheme(theme);
     set({ theme });
+    // Signed-in members keep the choice on every device. Fire and forget: the browser copy already applies.
+    void import('./api').then(({ api }) => api('/account', { method: 'PATCH', body: { theme } }).catch(() => undefined));
   },
 }));
+
+/** Used once after sign-in: adopt the account's saved choice without writing it back. */
+export function adoptAccountTheme(choice: ThemeChoice | undefined): void {
+  if (!choice || choice === useTheme.getState().theme) return;
+  try {
+    if (choice === 'system') localStorage.removeItem(KEY);
+    else localStorage.setItem(KEY, choice);
+  } catch {
+    /* storage unavailable */
+  }
+  applyTheme(choice);
+  useTheme.setState({ theme: choice });
+}
