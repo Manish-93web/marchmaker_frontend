@@ -3,7 +3,7 @@ import { Bell, Menu, Moon, Sun, X } from 'lucide-react';
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useLogout, useMe } from '../lib/auth';
 import { usePageViews } from '../lib/analytics';
 import { useUnread } from '../lib/notifications';
@@ -32,6 +32,8 @@ export function Shell() {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const { data: me } = useMe();
+  // Sign-in and sign-up screens are one screen tall: no marketing footer below them, so nothing forces a scroll.
+  const onAuthScreen = /^\/(login|register|forgot-password|reset-password|verify-email|recovery)/.test(useLocation().pathname);
   const logout = useLogout();
   const unread = useUnread(Boolean(me));
   usePageViews();
@@ -186,7 +188,7 @@ export function Shell() {
       <main id="main">
         <Outlet />
       </main>
-      <Footer />
+      {!onAuthScreen && <Footer />}
       <ConsentBanner />
     </>
   );

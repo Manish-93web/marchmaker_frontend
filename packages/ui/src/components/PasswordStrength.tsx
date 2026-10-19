@@ -26,7 +26,7 @@ export function PasswordStrength({ password }: { password: string }) {
         ))}
       </div>
       <p className="mt-1 text-xs text-muted">
-        {password ? `Password strength: ${LABELS[s]}` : 'Use at least 10 characters with upper case, lower case and a number'}
+        {password ? `Password strength: ${LABELS[s]}` : '10+ characters, upper and lower case, a number'}
       </p>
     </div>
   );

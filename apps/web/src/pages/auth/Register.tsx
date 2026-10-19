@@ -88,21 +88,23 @@ export function Register() {
   }
 
   return (
-    <AuthLayout title={t('auth.register.title')} subtitle={t('auth.register.subtitle')}>
-      {ref && <p className="mb-4 rounded-card bg-surface-2 p-3 text-sm">{t('r.invited')}</p>}
-      <div className="mb-4">
-        <GoogleSignIn mode="signup" referralCode={ref} />
-      </div>
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
-        {formError && <Banner tone="danger">{formError}</Banner>}
-        <Input label={t('auth.register.firstName')} autoComplete="given-name" error={errors.firstName?.message} {...register('firstName')} />
+    <AuthLayout wide title={t('auth.register.title')}>
+      {ref && <p className="rounded-card bg-surface-2 p-3 text-sm">{t('r.invited')}</p>}
+      <GoogleSignIn mode="signup" referralCode={ref} />
+      <form onSubmit={onSubmit} className="grid gap-x-4 gap-y-3 sm:grid-cols-2" noValidate>
+        {formError && (
+          <div className="sm:col-span-2">
+            <Banner tone="danger">{formError}</Banner>
+          </div>
+        )}
+        <Input label={t('auth.register.firstName')} className="py-2" autoComplete="given-name" error={errors.firstName?.message} {...register('firstName')} />
         <div>
-          <label htmlFor="gender" className="mb-1.5 block text-sm font-medium">
+          <label htmlFor="gender" className="mb-1 block text-sm font-medium">
             {t('auth.register.gender')}
           </label>
           <select
             id="gender"
-            className="min-h-[44px] w-full rounded-card border border-border bg-surface px-4 text-base"
+            className="min-h-[42px] w-full rounded-card border border-border bg-surface px-4 py-2 text-base"
             {...register('gender')}
           >
             <option value="woman">{t('auth.register.woman')}</option>
@@ -111,26 +113,28 @@ export function Register() {
           </select>
         </div>
         <Input
-          label={t('auth.register.dob')}
-          hint={t('auth.register.dobHint')}
+          label={`${t('auth.register.dob')} (${t('auth.register.dobHint')})`}
+          className="py-2"
           type="date"
           autoComplete="bday"
           error={errors.dob?.message}
           {...register('dob')}
         />
-        <Input label={t('auth.register.email')} type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
+        <Input label={t('auth.register.email')} className="py-2" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
         <Input
           label={t('auth.register.phone')}
-          hint={t('auth.register.phoneHint')}
+          className="py-2"
+          placeholder={t('auth.register.phoneHint')}
           type="tel"
           inputMode="numeric"
           autoComplete="tel-national"
           error={errors.phone?.message}
           {...register('phone')}
         />
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Input
             label={t('auth.register.password')}
+            className="py-2"
             type="password"
             autoComplete="new-password"
             error={errors.password?.message}
@@ -138,19 +142,19 @@ export function Register() {
           />
           <PasswordStrength password={watch('password') ?? ''} />
         </div>
-        <label className="flex items-start gap-3 text-sm">
+        <label className="flex items-start gap-3 text-sm sm:col-span-2">
           <input type="checkbox" className="mt-1 h-5 w-5" {...register('acceptTerms')} />
           <span>{t('auth.register.terms')}</span>
         </label>
         {errors.acceptTerms && (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="text-sm text-danger sm:col-span-2">
             Please accept the terms to continue
           </p>
         )}
-        <Button type="submit" className="w-full" loading={isSubmitting}>
+        <Button type="submit" className="w-full sm:col-span-2" loading={isSubmitting}>
           {t('auth.register.submit')}
         </Button>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted sm:col-span-2">
           {t('auth.register.haveAccount')}{' '}
           <Link className="text-primary underline" to="/login">
             {t('auth.login.submit')}

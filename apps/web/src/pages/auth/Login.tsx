@@ -53,14 +53,13 @@ export function Login() {
 
   return (
     <AuthLayout title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
-      <div className="mb-4">
-        <GoogleSignIn mode="signin" />
-      </div>
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <GoogleSignIn mode="signin" />
+      <form onSubmit={onSubmit} className="space-y-3" noValidate>
         {formError && <Banner tone="danger">{formError}</Banner>}
         <Input
           label={t('auth.login.email')}
           type="email"
+          className="py-2"
           autoComplete="username"
           error={errors.email?.message}
           {...register('email')}
@@ -68,6 +67,7 @@ export function Login() {
         <Input
           label={t('auth.login.password')}
           type="password"
+          className="py-2"
           autoComplete="current-password"
           error={errors.password?.message}
           {...register('password')}
@@ -86,7 +86,7 @@ export function Login() {
         <Button type="submit" className="w-full" loading={isSubmitting}>
           {t('auth.login.submit')}
         </Button>
-        <div className="flex flex-col gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           <Link className="text-primary underline" to="/forgot-password">
             {t('auth.login.forgot')}
           </Link>

@@ -76,7 +76,7 @@ describe('Register', () => {
     wrap(<Register />);
     const user = userEvent.setup();
     await user.type(screen.getByLabelText('First name'), 'Asha');
-    fireEvent.change(screen.getByLabelText('Date of birth'), { target: { value: '2015-01-01' } });
+    fireEvent.change(screen.getByLabelText(/Date of birth/), { target: { value: '2015-01-01' } });
     await user.type(screen.getByLabelText('Email'), 'asha@example.com');
     await user.type(screen.getByLabelText('Password'), 'Sup3rSecretPass');
     await user.click(screen.getByRole('checkbox'));
@@ -90,7 +90,7 @@ describe('Register', () => {
     wrap(<Register />);
     const user = userEvent.setup();
     await user.type(screen.getByLabelText('First name'), 'Asha');
-    fireEvent.change(screen.getByLabelText('Date of birth'), { target: { value: '1996-05-10' } });
+    fireEvent.change(screen.getByLabelText(/Date of birth/), { target: { value: '1996-05-10' } });
     await user.type(screen.getByLabelText('Email'), 'asha@example.com');
     await user.type(screen.getByLabelText(/Mobile number/), '98765 43210');
     await user.type(screen.getByLabelText('Password'), 'Sup3rSecretPass');
@@ -110,7 +110,7 @@ describe('Register', () => {
     wrap(<Register />);
     const user = userEvent.setup();
     await user.type(screen.getByLabelText('First name'), 'Meera');
-    fireEvent.change(screen.getByLabelText('Date of birth'), { target: { value: '1996-02-02' } });
+    fireEvent.change(screen.getByLabelText(/Date of birth/), { target: { value: '1996-02-02' } });
     await user.type(screen.getByLabelText('Email'), 'meera@example.com');
     await user.type(screen.getByLabelText('Password'), 'Sup3rSecretPass');
     await user.click(screen.getByRole('checkbox'));
