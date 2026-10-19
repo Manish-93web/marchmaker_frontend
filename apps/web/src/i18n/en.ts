@@ -37,6 +37,9 @@ export const en = {
     },
     google: {
       or: 'or use your email',
+      signin: 'Sign in with Google',
+      signup: 'Sign up with Google',
+      devNote: 'Development note: set GOOGLE_CLIENT_ID in apps/api/.env to turn this on. Real visitors will not see this placeholder.',
       unavailable: 'Google sign-in could not load. You can use your email instead.',
       finish: 'Almost there, {{name}}',
       finishBody: 'You are signed in with Google as {{email}}. Two more details and your account is ready.',

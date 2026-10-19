@@ -40,6 +40,9 @@ export const hi: DeepPartial<typeof en> = {
     },
     google: {
       or: 'या ईमेल से जारी रखें',
+      signin: 'Google से साइन इन करें',
+      signup: 'Google से साइन अप करें',
+      devNote: 'डेवलपमेंट नोट: इसे चालू करने के लिए apps/api/.env में GOOGLE_CLIENT_ID सेट करें। असली आगंतुकों को यह नहीं दिखेगा।',
       unavailable: 'Google साइन-इन लोड नहीं हो सका। आप ईमेल से जारी रख सकते हैं।',
       finish: 'बस थोड़ा और, {{name}}',
       finishBody: 'आपने {{email}} से Google में साइन इन किया है। दो और जानकारी देते ही आपका खाता तैयार है।',
