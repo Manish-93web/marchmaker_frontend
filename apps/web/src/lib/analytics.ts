@@ -37,6 +37,11 @@ export function clearAnonId() {
   }
 }
 
+function csrfHeader(): Record<string, string> {
+  const token = typeof document === 'undefined' ? undefined : document.cookie.split('; ').find((c) => c.startsWith('mm_csrf='))?.split('=')[1];
+  return token ? { 'X-CSRF-Token': token } : {};
+}
+
 function flush() {
   timer = undefined;
   if (!queue.length || !analyticsAllowed()) {
@@ -48,7 +53,8 @@ function flush() {
   // keepalive lets the last batch leave while the tab is closing.
   void fetch('/api/v1/analytics/events', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    // A signed-in visitor carries session cookies, so the server asks for the CSRF token like any other write.
+    headers: { 'Content-Type': 'application/json', ...csrfHeader() },
     credentials: 'include',
     body,
     keepalive: true,
