@@ -8,4 +8,5 @@ export { Dialog, Sheet, ConfirmDialog, Tooltip, TooltipProvider } from './compon
 export { Tabs, Accordion, Select, Avatar, type TabItem, type AccordionItem, type SelectOption } from './components/Navigation';
 export { StatTile, Timeline, PricingCard, AudioPlayer, NotificationBell, CommandPalette, type TimelineStep, type PricingCardProps, type PaletteCommand } from './components/Composite';
 export { Combobox, type ComboOption } from './components/Combobox';
+export { AuthArt } from './components/AuthArt';
 export { RangeSlider, Stepper, BlurredPhoto, IntroductionCard, type StepperStep, type IntroductionCardProps } from './components/Introductions';

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AuthArt } from './AuthArt';
+import { AuthArt } from '@marchmaker/ui';
 
 /** Split layout: form on one side, an emotional quote panel on the other (hidden on small screens). */
 export function AuthLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
