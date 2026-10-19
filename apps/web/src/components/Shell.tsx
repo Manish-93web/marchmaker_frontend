@@ -21,6 +21,13 @@ const LINKS = [
   ['/faq', 'm.nav.faq'],
 ] as const;
 
+/** What a signed-in member needs one click away; everything else lives in the account menu. */
+const MEMBER_LINKS = [
+  ['/dashboard', 'nav.dashboard'],
+  ['/introductions', 'i.title'],
+  ['/messages', 'i.messages.title'],
+] as const;
+
 export function Shell() {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -54,15 +61,27 @@ export function Shell() {
             Marchmaker
           </Link>
 
-          <ul className={me ? 'hidden items-center gap-1 2xl:flex' : 'hidden items-center gap-1 xl:flex'}>
-            {LINKS.map(([to, key]) => (
-              <li key={to}>
-                <Link to={to} className="whitespace-nowrap rounded-pill px-3 py-2 text-sm text-ink hover:bg-surface-2">
-                  {t(key)}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {me ? (
+            <ul className="hidden items-center gap-1 lg:flex">
+              {MEMBER_LINKS.map(([to, key]) => (
+                <li key={to}>
+                  <Link to={to} className="whitespace-nowrap rounded-pill px-3 py-2 text-sm text-ink hover:bg-surface-2">
+                    {t(key)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul className="hidden items-center gap-1 xl:flex">
+              {LINKS.map(([to, key]) => (
+                <li key={to}>
+                  <Link to={to} className="whitespace-nowrap rounded-pill px-3 py-2 text-sm text-ink hover:bg-surface-2">
+                    {t(key)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline-flex">
@@ -94,15 +113,6 @@ export function Shell() {
                     </span>
                   )}
                 </Link>
-                <Link to="/introductions" className="hidden whitespace-nowrap px-2 text-sm lg:inline">
-                  {t('i.title')}
-                </Link>
-                <Link to="/messages" className="hidden whitespace-nowrap px-2 text-sm lg:inline">
-                  {t('i.messages.title')}
-                </Link>
-                <Link to="/dashboard" className="hidden whitespace-nowrap px-2 text-sm lg:inline">
-                  {t('nav.dashboard')}
-                </Link>
                 <AccountMenu
                   label={t('nav.account')}
                   signOut={{ label: t('nav.signOut'), run: () => logout.mutate() }}
@@ -117,7 +127,7 @@ export function Shell() {
                     ['/settings', t('nav.settings'), ''],
                   ]}
                 />
-                <Button variant="outline" size="sm" className="hidden sm:inline-flex" loading={logout.isPending} onClick={() => logout.mutate()}>
+                <Button variant="outline" size="sm" className="hidden whitespace-nowrap sm:inline-flex" loading={logout.isPending} onClick={() => logout.mutate()}>
                   {t('nav.signOut')}
                 </Button>
               </>
@@ -136,7 +146,7 @@ export function Shell() {
             <Button
               variant="ghost"
               size="sm"
-              className={me ? '2xl:hidden' : 'xl:hidden'}
+              className={me ? 'sm:hidden' : 'xl:hidden'}
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? t('m.nav.close') : t('m.nav.menu')}
@@ -147,9 +157,9 @@ export function Shell() {
           </div>
         </nav>
         {open && (
-          <div id="mobile-menu" className={me ? 'border-t border-border bg-surface 2xl:hidden' : 'border-t border-border bg-surface xl:hidden'}>
+          <div id="mobile-menu" className={me ? 'border-t border-border bg-surface sm:hidden' : 'border-t border-border bg-surface xl:hidden'}>
             <ul className="container py-2">
-              {LINKS.map(([to, key]) => (
+              {(me ? [] : LINKS).map(([to, key]) => (
                 <li key={to}>
                   <Link to={to} onClick={() => setOpen(false)} className="block min-h-[44px] py-3 text-ink">
                     {t(key)}
