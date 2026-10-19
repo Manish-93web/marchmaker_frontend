@@ -35,6 +35,15 @@ export const en = {
       create: 'Create an account',
       invalid: 'Email or password is incorrect',
     },
+    google: {
+      or: 'or use your email',
+      unavailable: 'Google sign-in could not load. You can use your email instead.',
+      finish: 'Almost there, {{name}}',
+      finishBody: 'You are signed in with Google as {{email}}. Two more details and your account is ready.',
+      needDob: 'Enter your date of birth',
+      needTerms: 'Please accept the terms to continue',
+      create: 'Create my account',
+    },
     register: {
       title: 'Create your account',
       subtitle: 'It takes about two minutes. You can finish your profile later.',

@@ -20,7 +20,7 @@ beforeEach(() => {
   calls = [];
   responder = () => ({ status: 200, body: {} });
   vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
-    calls.push({ url, init });
+    if (!url.endsWith('/meta')) calls.push({ url, init }); // the Google button asks /meta; these tests are about the forms
     const r = responder(url, init);
     return new Response(r.status === 204 ? null : JSON.stringify(r.body ?? {}), {
       status: r.status,

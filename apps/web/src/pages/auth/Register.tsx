@@ -6,6 +6,7 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
+import { GoogleSignIn } from '../../components/GoogleSignIn';
 import { api } from '../../lib/api';
 import { applyApiError } from '../../lib/forms';
 
@@ -89,6 +90,9 @@ export function Register() {
   return (
     <AuthLayout title={t('auth.register.title')} subtitle={t('auth.register.subtitle')}>
       {ref && <p className="mb-4 rounded-card bg-surface-2 p-3 text-sm">{t('r.invited')}</p>}
+      <div className="mb-4">
+        <GoogleSignIn mode="signup" referralCode={ref} />
+      </div>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {formError && <Banner tone="danger">{formError}</Banner>}
         <Input label={t('auth.register.firstName')} autoComplete="given-name" error={errors.firstName?.message} {...register('firstName')} />

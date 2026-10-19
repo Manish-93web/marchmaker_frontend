@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { AuthLayout } from '../../components/AuthLayout';
+import { GoogleSignIn } from '../../components/GoogleSignIn';
 import { api, ApiRequestError } from '../../lib/api';
 import { ME_KEY } from '../../lib/auth';
 
@@ -52,6 +53,9 @@ export function Login() {
 
   return (
     <AuthLayout title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
+      <div className="mb-4">
+        <GoogleSignIn mode="signin" />
+      </div>
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {formError && <Banner tone="danger">{formError}</Banner>}
         <Input
