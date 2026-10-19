@@ -176,6 +176,14 @@ export function AuthGate({ children }: { children: (me: StaffMe) => ReactNode })
     return <p className="container py-16">This account does not have access to the console.</p>;
   }
   if (needsSetup) {
+    if (setup.isError) {
+      return (
+        <main className="container max-w-md space-y-4 py-16">
+          <Banner tone="danger">We could not start two-factor setup. Your sign-in may be out of date. Sign out and sign in again.</Banner>
+          <Button onClick={() => void api('/auth/logout', { method: 'POST' }).finally(() => void refresh())}>Sign out</Button>
+        </main>
+      );
+    }
     if (!setup.data) return <p className="container py-16">Preparing two-factor setup…</p>;
     return <TotpSetup secret={setup.data.secret} otpauthUrl={setup.data.otpauthUrl} onDone={() => void refresh()} />;
   }
