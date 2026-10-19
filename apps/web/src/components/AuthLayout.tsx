@@ -11,7 +11,7 @@ export function AuthLayout({ title, subtitle, children, wide = false, hideHeadin
   return (
     <div className="grid min-h-[calc(100dvh-4rem-1px)] lg:grid-cols-2">
       <div className="flex items-center justify-center px-4 py-3">
-        <div className={`w-full space-y-3 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
+        <div className={`auth-compact w-full space-y-3 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
           {hideHeading ? (
             <h1 className="sr-only">{title}</h1>
           ) : (

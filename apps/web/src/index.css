@@ -8,3 +8,36 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
 }
+
+/* Sign-in and sign-up should fit one screen. On short windows (laptops with display scaling, small browser windows)
+   the forms tighten up instead of scrolling. */
+@media (max-height: 760px) {
+  .auth-compact form {
+    row-gap: 0.5rem !important;
+  }
+  .auth-compact form > * + * {
+    margin-top: 0.5rem !important;
+  }
+  .auth-compact form.sm\:grid-cols-2 > * + * {
+    margin-top: 0 !important;
+  }
+  .auth-compact input:not([type='checkbox']),
+  .auth-compact select {
+    min-height: 36px !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    font-size: 0.9375rem !important;
+  }
+  .auth-compact label {
+    font-size: 0.8125rem !important;
+    margin-bottom: 0.125rem !important;
+  }
+  .auth-compact button[type='submit'] {
+    min-height: 40px !important;
+  }
+}
+@media (max-height: 640px) {
+  .auth-compact [data-hide-short] {
+    display: none !important;
+  }
+}

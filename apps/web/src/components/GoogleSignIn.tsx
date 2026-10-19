@@ -160,7 +160,7 @@ export function GoogleSignIn({ mode, referralCode }: { mode: 'signin' | 'signup'
     <div className="space-y-3">
       {error && <Banner tone="danger">{error}</Banner>}
       <div ref={holder} className="flex min-h-[44px] w-full justify-center" aria-busy={busy} />
-      <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted" aria-hidden="true">
+      <div data-hide-short className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted" aria-hidden="true">
         <span className="h-px flex-1 bg-border" />
         {t('auth.google.or')}
         <span className="h-px flex-1 bg-border" />

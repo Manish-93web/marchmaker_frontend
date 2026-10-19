@@ -140,7 +140,9 @@ export function Register() {
             error={errors.password?.message}
             {...register('password')}
           />
-          <PasswordStrength password={watch('password') ?? ''} />
+          <div data-hide-short>
+            <PasswordStrength password={watch('password') ?? ''} />
+          </div>
         </div>
         <label className="flex items-start gap-3 text-sm sm:col-span-2">
           <input type="checkbox" className="mt-1 h-5 w-5" {...register('acceptTerms')} />

@@ -40,17 +40,15 @@ function SignIn({ onDone }: { onDone: () => void }) {
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-2">
-      <div className="flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      <div className="flex items-center justify-center px-6 py-6">
+        <div className="auth-compact w-full max-w-md">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
             Staff console
           </p>
           <h1 className="mt-2 font-display text-3xl text-primary">Marchmaker Admin</h1>
-          <p className="mt-2 text-sm text-muted">
-            Sign in to review profiles, verify members and look after introductions.
-          </p>
+          
           <form
-            className="mt-8 space-y-4"
+            className="mt-5 space-y-3"
             onSubmit={(e) => {
               e.preventDefault();
               void submit(askTotp && !useRecovery ? totp : undefined);
