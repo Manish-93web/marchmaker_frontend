@@ -88,7 +88,7 @@ export function Register() {
   }
 
   return (
-    <AuthLayout wide title={t('auth.register.title')}>
+    <AuthLayout wide hideHeading title={t('auth.register.title')}>
       {ref && <p className="rounded-card bg-surface-2 p-3 text-sm">{t('r.invited')}</p>}
       <GoogleSignIn mode="signup" referralCode={ref} />
       <form onSubmit={onSubmit} className="grid gap-x-4 gap-y-3 sm:grid-cols-2" noValidate>

@@ -5,16 +5,21 @@ import { AuthArt } from '@marchmaker/ui';
 
 /** Split layout: form on one side, an emotional quote panel on the other (hidden on small screens). */
 /** `wide` gives long forms (sign-up) room for two columns, so they fit on one screen without scrolling. */
-export function AuthLayout({ title, subtitle, children, wide = false }: { title: string; subtitle?: string; children: ReactNode; wide?: boolean }) {
+/** `hideHeading` keeps the title for screen readers and the page outline but does not draw it. */
+export function AuthLayout({ title, subtitle, children, wide = false, hideHeading = false }: { title: string; subtitle?: string; children: ReactNode; wide?: boolean; hideHeading?: boolean }) {
   const { t } = useTranslation();
   return (
     <div className="grid min-h-[calc(100dvh-4rem-1px)] lg:grid-cols-2">
       <div className="flex items-center justify-center px-4 py-3">
         <div className={`w-full space-y-3 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
-          <div>
-            <h1 className="font-display text-2xl text-primary">{title}</h1>
-            {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
-          </div>
+          {hideHeading ? (
+            <h1 className="sr-only">{title}</h1>
+          ) : (
+            <div>
+              <h1 className="font-display text-2xl text-primary">{title}</h1>
+              {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+            </div>
+          )}
           {children}
         </div>
       </div>

@@ -52,7 +52,7 @@ export function Login() {
   });
 
   return (
-    <AuthLayout title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
+    <AuthLayout hideHeading title={t('auth.login.title')} subtitle={t('auth.login.subtitle')}>
       <GoogleSignIn mode="signin" />
       <form onSubmit={onSubmit} className="space-y-3" noValidate>
         {formError && <Banner tone="danger">{formError}</Banner>}
