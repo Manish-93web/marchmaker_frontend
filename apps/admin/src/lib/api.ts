@@ -18,7 +18,7 @@ const BASE = '/api/v1';
 function readCsrf(): string | undefined {
   return document.cookie
     .split('; ')
-    .find((c) => c.startsWith('mm_csrf='))
+    .find((c) => c.startsWith('mm_staff_csrf='))
     ?.split('=')[1];
 }
 
@@ -33,7 +33,8 @@ export interface RequestOptions {
 /** Thin typed fetch: cookies for auth, CSRF double-submit header, friendly errors. */
 export async function api<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, idempotencyKey, ifMatch, signal } = opts;
-  const headers: Record<string, string> = { Accept: 'application/json' };
+  // The console has its own cookies, so signing in here never replaces a member's session on the same host.
+  const headers: Record<string, string> = { Accept: 'application/json', 'X-App': 'admin' };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
   if (method !== 'GET') {
     const csrf = readCsrf();
