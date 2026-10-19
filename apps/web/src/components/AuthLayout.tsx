@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { AuthArt } from './AuthArt';
 
 /** Split layout: form on one side, an emotional quote panel on the other (hidden on small screens). */
 export function AuthLayout({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
@@ -16,17 +17,12 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
           {children}
         </div>
       </div>
-      <aside
-        aria-hidden
-        className="relative hidden items-end overflow-hidden bg-primary p-12 text-primary-fg lg:flex"
-        style={{
-          backgroundImage:
-            'radial-gradient(70% 60% at 80% 0%, rgb(242 163 58 / 0.35), transparent), radial-gradient(60% 60% at 0% 100%, rgb(226 114 91 / 0.3), transparent)',
-        }}
-      >
-        <div className="max-w-md">
-          <p className="font-display text-2xl leading-snug">{t('auth.quote')}</p>
-          <p className="mt-4 text-sm opacity-80">{t('auth.quoteSub')}</p>
+      <aside aria-hidden className="relative hidden items-end overflow-hidden p-12 text-white lg:flex">
+        <AuthArt />
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="relative max-w-md">
+          <p className="font-display text-3xl leading-snug">{t('auth.quote')}</p>
+          <p className="mt-4 text-sm text-white/80">{t('auth.quoteSub')}</p>
           <Link to="/" tabIndex={-1} className="sr-only">
             Home
           </Link>
