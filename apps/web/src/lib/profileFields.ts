@@ -17,6 +17,8 @@ export interface FieldDef {
   autoComplete?: string;
   voice?: boolean;
   maxLength?: number;
+  /** Characters needed before the step counts as done (the server enforces the same). */
+  minLength?: number;
 }
 
 const RELIGIONS = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jain', 'Buddhist', 'Parsi', 'Jewish', 'Spiritual', 'No religion'];
@@ -104,7 +106,7 @@ export const STEP_FIELDS: Record<Exclude<ProfileStep, 'photos'>, FieldDef[]> = {
     { name: 'livingWithFamily', kind: 'chips', required: true, why: true, options: ['yes', 'no', 'open'] },
     { name: 'careerAfterMarriage', kind: 'chips', options: ['continue', 'pause', 'flexible'] },
   ],
-  about: [{ name: 'bio', kind: 'textarea', required: true, why: true, voice: true, maxLength: 1000 }],
+  about: [{ name: 'bio', kind: 'textarea', required: true, why: true, voice: true, minLength: 50, maxLength: 1000 }],
 };
 
 export const PROMPT_IDS = ['perfect_sunday', 'looking_for', 'grew_up'] as const;

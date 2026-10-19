@@ -115,6 +115,7 @@ export const profile = {
     looking_for: 'What I am looking for',
     grew_up: 'Something I learned growing up',
   },
+  minLength: '{{count}} of {{min}} characters needed for this step to be marked done',
   autosave: {
     saving: 'Saving…',
     saved: 'Saved ✓ just now',

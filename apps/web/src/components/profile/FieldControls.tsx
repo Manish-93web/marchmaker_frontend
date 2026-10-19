@@ -121,7 +121,7 @@ export function FieldControl({ def, value, onChange, onBlur, error, disabled }: 
       <div className="space-y-2">
         <Textarea
           label={`${label}${required}`}
-          hint={why ? undefined : undefined}
+          hint={def.minLength ? t('p.minLength', { count: str.trim().length, min: def.minLength }) : undefined}
           value={str}
           maxLength={def.maxLength}
           disabled={disabled}

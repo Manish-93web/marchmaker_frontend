@@ -118,6 +118,7 @@ export const hiProfile: DeepPartial<typeof profile> = {
     looking_for: 'मैं क्या ढूँढ रहा/रही हूँ',
     grew_up: 'बड़े होते हुए मैंने जो सीखा',
   },
+  minLength: 'इस चरण को पूरा मानने के लिए {{min}} में से {{count}} अक्षर हुए',
   autosave: {
     saving: 'सहेज रहे हैं…',
     saved: 'अभी सहेजा गया ✓',
