@@ -74,8 +74,8 @@ function PlanCard({ plan, interval }: { plan: PlanDefinition; interval: BillingI
       )}
       <h3 className="font-display text-xl text-primary">{plan.name}</h3>
       <p className="mt-1 min-h-[3rem] text-sm text-muted">{plan.tagline}</p>
-      <p className="mt-4 flex items-baseline gap-1">
-        <span className="font-display text-3xl text-ink">{free ? t('m.pricing.free') : formatInr(price)}</span>
+      <p className="mt-4 flex flex-wrap items-baseline gap-x-1.5">
+        <span className="whitespace-nowrap font-display text-2xl leading-tight text-ink 2xl:text-3xl">{free ? t('m.pricing.free') : formatInr(price)}</span>
         {!free && <span className="text-sm text-muted">{t(SUFFIX[shown])}</span>}
       </p>
       <p className="mt-1 h-5 text-sm text-success">{save > 0 ? t('m.pricing.save', { pct: save }) : ''}</p>
