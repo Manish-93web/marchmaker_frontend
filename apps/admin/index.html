@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#4A1D3F" /><meta name="robots" content="noindex,nofollow" />
+    <script>
+      // Light by default; dark only if the person chose it. Runs before first paint so there is no flash.
+      try {
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('mm_theme') === 'dark' ? 'dark' : 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    </script>
     <title>Marchmaker Admin</title>
   </head>
   <body>

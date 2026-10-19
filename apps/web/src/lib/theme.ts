@@ -3,12 +3,13 @@ import { create } from 'zustand';
 export type ThemeChoice = 'light' | 'dark' | 'system';
 const KEY = 'mm_theme';
 
+/** Light unless the person chose dark. The operating system's setting is deliberately not followed by default. */
 function read(): ThemeChoice {
   try {
     const v = localStorage.getItem(KEY);
-    return v === 'light' || v === 'dark' ? v : 'system';
+    return v === 'dark' || v === 'system' ? v : 'light';
   } catch {
-    return 'system';
+    return 'light';
   }
 }
 
@@ -41,10 +42,10 @@ export const useTheme = create<ThemeState>((set) => ({
 
 /** Used once after sign-in: adopt the account's saved choice without writing it back. */
 export function adoptAccountTheme(choice: ThemeChoice | undefined): void {
-  if (!choice || choice === useTheme.getState().theme) return;
+  // An account that never picked a theme reports 'system'; that must not override the light default.
+  if (!choice || choice === 'system' || choice === useTheme.getState().theme) return;
   try {
-    if (choice === 'system') localStorage.removeItem(KEY);
-    else localStorage.setItem(KEY, choice);
+    localStorage.setItem(KEY, choice);
   } catch {
     /* storage unavailable */
   }

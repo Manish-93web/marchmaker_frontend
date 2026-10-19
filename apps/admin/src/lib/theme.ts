@@ -3,12 +3,13 @@ import { create } from 'zustand';
 export type ThemeChoice = 'light' | 'dark' | 'system';
 const KEY = 'mm_theme';
 
+/** Light unless the person chose dark. The operating system's setting is deliberately not followed by default. */
 function read(): ThemeChoice {
   try {
     const v = localStorage.getItem(KEY);
-    return v === 'light' || v === 'dark' ? v : 'system';
+    return v === 'dark' || v === 'system' ? v : 'light';
   } catch {
-    return 'system';
+    return 'light';
   }
 }
 
