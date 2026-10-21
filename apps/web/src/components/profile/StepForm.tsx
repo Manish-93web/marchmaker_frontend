@@ -1,6 +1,6 @@
-import { Button, Textarea } from '@marchmaker/ui';
+import { Textarea } from '@marchmaker/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAutosave, type SaveState } from '../../lib/autosave';
 import { PROFILE_KEY, type ProfileDoc } from '../../lib/profile';
@@ -20,7 +20,7 @@ function SaveIndicator({ state }: { state: SaveState }) {
         ? t('p.autosave.saved')
         : state === 'offline'
           ? t('p.autosave.offline')
-          : state === 'error' || state === 'conflict'
+          : state === 'error'
             ? t('p.autosave.error')
             : '';
   return (
@@ -31,81 +31,6 @@ function SaveIndicator({ state }: { state: SaveState }) {
     >
       {text}
     </p>
-  );
-}
-
-function ConflictDialog({
-  mine,
-  theirs,
-  onApply,
-}: {
-  mine: Values;
-  theirs: Values;
-  onApply: (merged: Values) => void;
-}) {
-  const { t } = useTranslation();
-  // `mine` holds only the fields this member edited, so only those can conflict. Fields the
-  // other device changed that this one never touched simply keep the saved value.
-  const keys = Object.keys(mine).filter((k) => JSON.stringify(mine[k] ?? null) !== JSON.stringify(theirs[k] ?? null));
-  const [choice, setChoice] = useState<Record<string, 'mine' | 'theirs'>>(() =>
-    Object.fromEntries(keys.map((k) => [k, 'mine' as const])),
-  );
-  const first = useRef<HTMLButtonElement>(null);
-  useEffect(() => first.current?.focus(), []);
-  const show = (v: unknown) => (v === undefined || v === null || v === '' ? t('p.conflict.empty') : String(v));
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="presentation">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="conflict-title"
-        className="max-h-[90dvh] w-full max-w-lg space-y-4 overflow-y-auto rounded-hero bg-surface p-6 shadow-lg"
-      >
-        <h2 id="conflict-title" className="font-display text-xl text-primary">
-          {t('p.conflict.title')}
-        </h2>
-        <p className="text-muted">{t('p.conflict.body')}</p>
-        <ul className="space-y-4">
-          {keys.map((k) => (
-            <li key={k}>
-              <p className="text-sm font-medium">{t(`p.f.${k}`, k)}</p>
-              <div className="mt-1 grid gap-2 sm:grid-cols-2">
-                {(['mine', 'theirs'] as const).map((side) => (
-                  <label
-                    key={side}
-                    className={`flex cursor-pointer gap-2 rounded-card border p-3 text-sm ${
-                      choice[k] === side ? 'border-primary bg-surface-2' : 'border-border'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={`c-${k}`}
-                      checked={choice[k] === side}
-                      onChange={() => setChoice((c) => ({ ...c, [k]: side }))}
-                    />
-                    <span>
-                      <span className="block text-xs text-muted">{t(`p.conflict.${side}`)}</span>
-                      {show(side === 'mine' ? mine[k] : theirs[k])}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </li>
-          ))}
-        </ul>
-        <Button
-          ref={first}
-          onClick={() => {
-            const merged: Values = {};
-            for (const k of keys) merged[k] = (choice[k] === 'mine' ? mine[k] : theirs[k]) ?? null;
-            onApply(merged);
-          }}
-        >
-          {t('p.conflict.apply')}
-        </Button>
-      </div>
-    </div>
   );
 }
 
@@ -121,7 +46,7 @@ export function StepForm({ step, doc, locked, onDoc }: Props) {
   const qc = useQueryClient();
   const [values, setValues] = useState<Values>(() => ({ ...(doc.data[step] ?? {}) }));
 
-  const { state, queue, flush, conflict, resolve, fieldErrors } = useAutosave({
+  const { state, queue, flush, fieldErrors } = useAutosave({
     step,
     initialVersion: doc.version,
     getVersion: () => qc.getQueryData<ProfileDoc>(PROFILE_KEY)?.version,
@@ -173,16 +98,6 @@ export function StepForm({ step, doc, locked, onDoc }: Props) {
             />
           ))}
         </fieldset>
-      )}
-      {conflict && (
-        <ConflictDialog
-          mine={conflict.mine}
-          theirs={conflict.theirs}
-          onApply={(merged) => {
-            setValues((cur) => ({ ...cur, ...merged }));
-            void resolve(merged);
-          }}
-        />
       )}
     </form>
   );

@@ -124,14 +124,6 @@ export const profile = {
     idle: '',
   },
   nav: { back: 'Back', next: 'Continue', review: 'Review', stepOf: 'Step {{n}} of {{total}}', rail: 'Profile steps' },
-  conflict: {
-    title: 'This profile was changed somewhere else',
-    body: 'You edited it on another device or tab. Choose which version to keep for each answer.',
-    mine: 'Mine',
-    theirs: 'Saved',
-    apply: 'Apply my choices',
-    empty: '(empty)',
-  },
   review: {
     ready: 'Everything is in place',
     readyBody: 'Our team reviews every profile by hand, usually within 48 hours. You will be notified as soon as it is done.',

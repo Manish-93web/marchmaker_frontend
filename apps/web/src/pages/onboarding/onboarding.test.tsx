@@ -85,7 +85,7 @@ describe('profile autosave', () => {
     expect(patches()[0]?.body).toEqual({ firstName: null });
   });
 
-  it('asks the member to choose when another device saved first, then resends on the new version', async () => {
+  it('quietly resends on the newer server version when another copy saved first, with no question asked', async () => {
     let first = true;
     handler = (c) => {
       if (c.method !== 'PATCH') return { status: 200 };
@@ -109,16 +109,12 @@ describe('profile autosave', () => {
     const user = userEvent.setup();
     await user.type(screen.getByLabelText(/Height \(cm\)/), '165');
 
-    const dialog = await screen.findByRole('dialog', {}, { timeout: 3000 });
-    expect(dialog).toHaveTextContent('changed somewhere else');
-    expect(dialog).toHaveTextContent('165');
-    expect(dialog).toHaveTextContent('170');
-
-    await user.click(screen.getByRole('button', { name: 'Apply my choices' }));
-    await waitFor(() => expect(patches()).toHaveLength(2));
+    // No question is asked: the page takes the server's version (7) and sends the same edit again.
+    await waitFor(() => expect(patches()).toHaveLength(2), { timeout: 4000 });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(patches()[0]?.body).toEqual({ heightCm: 165 });
     expect(patches()[1]?.headers['If-Match']).toBe('7');
     expect(patches()[1]?.body).toEqual({ heightCm: 165 });
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
   it('disables inputs while the profile is under review', () => {

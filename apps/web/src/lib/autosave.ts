@@ -3,14 +3,8 @@ import { DEFAULTS, type ProfileStep } from '@marchmaker/shared';
 import { api, ApiRequestError } from './api';
 import type { ProfileDoc } from './profile';
 
-export type SaveState = 'idle' | 'saving' | 'saved' | 'error' | 'offline' | 'conflict';
+export type SaveState = 'idle' | 'saving' | 'saved' | 'error' | 'offline';
 type Values = Record<string, unknown>;
-
-export interface Conflict {
-  mine: Values;
-  theirs: Values;
-  serverVersion: number;
-}
 
 interface Options {
   step: ProfileStep;
@@ -34,12 +28,13 @@ const clean = (v: Values): Values => Object.fromEntries(Object.entries(v).map(([
  */
 export function useAutosave({ step, initialVersion, onSaved, getVersion, debounceMs = DEFAULTS.autosaveDebounceMs }: Options) {
   const [state, setState] = useState<SaveState>('idle');
-  const [conflict, setConflict] = useState<Conflict | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const version = useRef(initialVersion);
   const pending = useRef<Values>({});
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const paused = useRef(false);
+  const forceVersion = useRef<number | undefined>(undefined);
+  const conflictRetries = useRef(0);
   const stepRef = useRef(step);
   const onSavedRef = useRef(onSaved);
   onSavedRef.current = onSaved;
@@ -56,23 +51,30 @@ export function useAutosave({ step, initialVersion, onSaved, getVersion, debounc
       const doc = await api<ProfileDoc>(`/profile/steps/${stepRef.current}`, {
         method: 'PATCH',
         body: clean(patch),
-        ifMatch: Math.max(version.current, getVersionRef.current?.() ?? 0),
+        ifMatch: forceVersion.current ?? Math.max(version.current, getVersionRef.current?.() ?? 0),
       });
       version.current = doc.version;
+      forceVersion.current = undefined;
+      conflictRetries.current = 0;
       setFieldErrors({});
       onSavedRef.current?.(doc);
       setState(Object.keys(pending.current).length ? 'saving' : 'saved');
     } catch (e) {
       pending.current = { ...patch, ...pending.current };
       if (e instanceof ApiRequestError && e.code === 'VERSION_CONFLICT') {
-        paused.current = true;
-        const d = (e.details ?? {}) as { serverVersion?: number; serverData?: Values };
-        setConflict({
-          mine: pending.current,
-          theirs: d.serverData ?? {},
-          serverVersion: d.serverVersion ?? version.current,
-        });
-        setState('conflict');
+        // The saved copy moved on (another tab, a save that reached the server but whose answer was lost, or a reviewer).
+        // The edits sent here are only the fields this person just changed, so the safe, quiet answer is to take the
+        // server's current version and send them again: their latest edit wins, field by field, and nothing else is touched.
+        const d = (e.details ?? {}) as { serverVersion?: number };
+        if (typeof d.serverVersion === 'number' && conflictRetries.current < 3) {
+          conflictRetries.current += 1;
+          forceVersion.current = d.serverVersion;
+          version.current = d.serverVersion;
+          return send();
+        }
+        forceVersion.current = undefined;
+        conflictRetries.current = 0;
+        setState('error');
       } else if (e instanceof ApiRequestError && e.status === 0) {
         setState('offline');
       } else if (e instanceof ApiRequestError && e.status >= 400 && e.status < 500) {
@@ -127,23 +129,10 @@ export function useAutosave({ step, initialVersion, onSaved, getVersion, debounc
     };
   }, [flush]);
 
-  /** Resolve a conflict: send the member's chosen merge on top of the server version. */
-  const resolve = useCallback(
-    async (merged: Values) => {
-      if (!conflict) return;
-      version.current = conflict.serverVersion;
-      pending.current = merged;
-      paused.current = false;
-      setConflict(null);
-      await flush();
-    },
-    [conflict, flush],
-  );
-
-  /** Called when the page reloads fresh server data (for example after a conflict is cancelled). */
+  /** Called when the page reloads fresh server data (for example when the page refetches the profile). */
   const syncVersion = useCallback((v: number) => {
     version.current = v;
   }, []);
 
-  return { state, queue, flush, conflict, resolve, syncVersion, fieldErrors };
+  return { state, queue, flush, syncVersion, fieldErrors };
 }
