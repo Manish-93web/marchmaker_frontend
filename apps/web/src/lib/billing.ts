@@ -40,8 +40,8 @@ export interface PaymentRow {
 }
 
 export type Checkout =
-  | { kind: 'pack'; paid?: boolean; walletPaise?: number; keyId: string; orderId: string; amountPaise: number; credits: number; discountPaise: number }
-  | { kind: 'subscription'; keyId: string; subscriptionId: string; shortUrl: string | null };
+  | { kind: 'pack'; paid?: boolean; walletPaise?: number; keyId: string; orderId: string; amountPaise: number; credits: number; discountPaise: number; checkoutUrl?: string }
+  | { kind: 'subscription'; keyId: string; subscriptionId: string; shortUrl: string | null; checkoutUrl?: string };
 
 interface RazorpayResponse {
   razorpay_payment_id: string;
@@ -91,6 +91,11 @@ export async function runCheckout(c: Checkout, me: { email: string | null; first
     });
     return 'paid';
   }
+  // A hosted payment page (Stripe): leave this site for it. The page it returns to confirms the payment.
+  if (c.checkoutUrl) {
+    window.location.assign(c.checkoutUrl);
+    return new Promise<PayResult>(() => undefined);
+  }
   await loadCheckoutScript();
   const response = await new Promise<RazorpayResponse | null>((resolve) => {
     const opts: Record<string, unknown> = {
@@ -115,6 +120,20 @@ export async function runCheckout(c: Checkout, me: { email: string | null; first
     signature: response.razorpay_signature,
     ...(c.kind === 'pack' ? { orderId: response.razorpay_order_id } : { subscriptionId: response.razorpay_subscription_id }),
   };
+  for (let i = 0; i < 20; i++) {
+    const r = await api<{ status: 'paid' | 'pending' }>('/billing/confirm', { method: 'POST', body });
+    if (r.status === 'paid') return 'paid';
+    await sleep(3000);
+  }
+  return 'pending';
+}
+
+/**
+ * The member is back from a hosted payment page. Nothing in the address is trusted: the server asks the payment
+ * provider what was actually paid, and we ask the server until it says so.
+ */
+export async function confirmReturn(ref: { order?: string; sub?: string }): Promise<PayResult> {
+  const body = { paymentId: 'hosted-checkout', signature: 'hosted-checkout', ...(ref.order ? { orderId: ref.order } : { subscriptionId: ref.sub }) };
   for (let i = 0; i < 20; i++) {
     const r = await api<{ status: 'paid' | 'pending' }>('/billing/confirm', { method: 'POST', body });
     if (r.status === 'paid') return 'paid';

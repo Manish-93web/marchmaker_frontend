@@ -8,7 +8,7 @@ import {
 } from '@marchmaker/shared';
 import { Badge, Banner, Button, Card, Input, Skeleton } from '@marchmaker/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -16,6 +16,7 @@ import { IntervalToggle, effectiveInterval, maxSavings } from '../../components/
 import { api, ApiRequestError } from '../../lib/api';
 import { ME_KEY, useMe } from '../../lib/auth';
 import {
+  confirmReturn,
   runCheckout,
   type BillingSummary,
   type Checkout,
@@ -35,7 +36,7 @@ export function Billing() {
   const qc = useQueryClient();
   const { data: me } = useMe();
   const { subscriptions, packs } = usePlans();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const wantedInterval = params.get('interval');
   const [interval, setInterval] = useState<BillingInterval>(
     wantedInterval === 'quarterly' || wantedInterval === 'annual' ? wantedInterval : 'monthly',
@@ -57,6 +58,36 @@ export function Billing() {
     void qc.invalidateQueries({ queryKey: ['billing', 'invoices'] });
     void qc.invalidateQueries({ queryKey: ME_KEY });
   };
+
+  // Back from Stripe's payment page: confirm what was paid, or say that nothing was.
+  const returned = params.get('checkout');
+  const returnOrder = params.get('order') ?? undefined;
+  const returnSub = params.get('sub') ?? undefined;
+  useEffect(() => {
+    if (!returned) return;
+    const clear = () => setParams((p) => { p.delete('checkout'); p.delete('order'); p.delete('sub'); return p; }, { replace: true });
+    if (returned === 'cancelled' || (!returnOrder && !returnSub)) {
+      setResult('dismissed');
+      clear();
+      return;
+    }
+    let live = true;
+    setPhase('confirming');
+    confirmReturn({ order: returnOrder, sub: returnSub })
+      .then((r) => {
+        if (!live) return;
+        setResult(r);
+        if (r === 'paid') refresh();
+      })
+      .catch((e) => toast.error(errMsg(e, t('common.somethingWrong'))))
+      .finally(() => {
+        if (live) setPhase('idle');
+        clear();
+      });
+    return () => {
+      live = false;
+    };
+  }, [returned]);
 
   async function pay(c: Checkout) {
     if (!me || !summary.data) return;
