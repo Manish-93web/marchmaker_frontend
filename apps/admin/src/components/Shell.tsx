@@ -37,8 +37,8 @@ import {
   Radar,
   Database,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, type ComponentType } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { STAFF_KEY, can, type StaffMe } from '../lib/session';
 import { applyTheme, useTheme } from '../lib/theme';
@@ -92,6 +92,8 @@ export function Shell({ me }: { me: StaffMe }) {
   const qc = useQueryClient();
   const { theme, setTheme } = useTheme();
   const [palette, setPalette] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
   const items = NAV.filter((n) => can(me, n.perm));
   const dark =
     theme === 'dark' ||
@@ -100,6 +102,11 @@ export function Shell({ me }: { me: StaffMe }) {
       window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => applyTheme(theme), [theme]);
+
+  // With a long menu, keep the page you are on in view without moving the rest of the screen.
+  useEffect(() => {
+    navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, [pathname]);
 
   // Cmd/Ctrl+K opens the palette from anywhere.
   useEffect(() => {
@@ -131,12 +138,12 @@ export function Shell({ me }: { me: StaffMe }) {
       >
         Skip to content
       </a>
-      <aside className="border-b border-border bg-surface lg:sticky lg:top-0 lg:h-dvh lg:border-b-0 lg:border-r">
-        <div className="flex items-center justify-between px-4 py-3 lg:block">
+      <aside className="border-b border-border bg-surface lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:border-b-0 lg:border-r">
+        <div className="flex shrink-0 items-center justify-between px-4 py-3 lg:block">
           <p className="font-display text-xl text-primary">Marchmaker</p>
           <p className="hidden text-xs text-muted lg:block">Admin console</p>
         </div>
-        <nav aria-label="Console" className="flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
+        <nav ref={navRef} aria-label="Console" className="thin-scroll flex gap-1 overflow-x-auto px-2 pb-2 lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-y-auto lg:overflow-x-hidden lg:pb-4">
           {items.map((n) => (
             <NavLink
               key={n.to}

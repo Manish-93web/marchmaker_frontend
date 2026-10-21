@@ -41,3 +41,23 @@ body {
     display: none !important;
   }
 }
+
+/* A slim scrollbar for long lists such as the admin menu: quiet until needed, on the theme's own colours. */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--mm-muted) 45%, transparent) transparent;
+}
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--mm-muted) 45%, transparent);
+  border-radius: 999px;
+}
+.thin-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--mm-muted);
+}
