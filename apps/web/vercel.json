@@ -4,7 +4,7 @@
   "buildCommand": "cd ../.. && pnpm turbo run build --filter=@marchmaker/web",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://marchmaker-api.onrender.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://marchmaker-api-r4pb.onrender.com/api/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
