@@ -1,3 +1,4 @@
+import { LoadingScreen } from '@marchmaker/ui';
 import { lazy, Suspense, type ReactNode } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
@@ -37,7 +38,7 @@ const Astrology = lazy(() => import('./pages/astrology/Astrology').then((m) => (
 const SafetyCentre = lazy(() => import('./pages/support/SafetyCentre').then((m) => ({ default: m.SafetyCentre })));
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 
-const page = (el: ReactNode) => <Suspense fallback={<div className="container py-10" aria-busy="true" />}>{el}</Suspense>;
+const page = (el: ReactNode) => <Suspense fallback={<LoadingScreen fullScreen={false} />}>{el}</Suspense>;
 
 export const router = createBrowserRouter([
   {

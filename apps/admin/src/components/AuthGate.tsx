@@ -1,4 +1,4 @@
-import { AuthArt, Banner, Button, Input, OtpInput } from '@marchmaker/ui';
+import { AuthArt, Banner, Button, Input, LoadingScreen, OtpInput } from '@marchmaker/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState, type ReactNode } from 'react';
@@ -246,7 +246,7 @@ export function AuthGate({ children }: { children: (me: StaffMe) => ReactNode })
   });
   const refresh = () => qc.invalidateQueries({ queryKey: STAFF_KEY });
 
-  if (me.isLoading) return <p className="container py-16">Loading…</p>;
+  if (me.isLoading) return <LoadingScreen label="Opening the console" hint="Checking your sign-in" />;
   if (!me.data) return <SignIn onDone={() => void refresh()} />;
   if (!me.data.roles.some((r) => r !== 'member')) {
     void api('/auth/logout', { method: 'POST' }).finally(() => void refresh());
@@ -270,7 +270,7 @@ export function AuthGate({ children }: { children: (me: StaffMe) => ReactNode })
         </main>
       );
     }
-    if (!setup.data) return <p className="container py-16">Preparing two-factor setup…</p>;
+    if (!setup.data) return <LoadingScreen label="Preparing two-factor setup" hint="This takes a moment" />;
     return (
       <TotpSetup
         secret={setup.data.secret}

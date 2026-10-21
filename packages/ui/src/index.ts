@@ -9,4 +9,5 @@ export { Tabs, Accordion, Select, Avatar, type TabItem, type AccordionItem, type
 export { StatTile, Timeline, PricingCard, AudioPlayer, NotificationBell, CommandPalette, type TimelineStep, type PricingCardProps, type PaletteCommand } from './components/Composite';
 export { Combobox, type ComboOption } from './components/Combobox';
 export { AuthArt } from './components/AuthArt';
+export { LoadingScreen } from './components/LoadingScreen';
 export { RangeSlider, Stepper, BlurredPhoto, IntroductionCard, type StepperStep, type IntroductionCardProps } from './components/Introductions';
